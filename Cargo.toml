@@ -1,6 +1,33 @@
 [package]
 name = "daoyi-cloud-axum"
-version = "0.1.0"
-edition = "2024"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "daoyi-cloud-axum aggregated server entry point"
+license.workspace = true
+repository.workspace = true
+readme.workspace = true
+authors.workspace = true
+keywords.workspace = true
+categories.workspace = true
+publish = false
 
 [dependencies]
+
+[workspace]
+members = [
+    ".",
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.9.0"
+edition = "2024"
+rust-version = "1.94.0"
+description = "Rust cloud-native microservice scaffold based on Axum + SeaORM + MySQL"
+license = "MIT"
+repository = "https://github.com/gemiman/daoyi-cloud-axum"
+readme = "README.md"
+authors = ["兰陵王 <gemiman@vip.qq.com>"]
+keywords = ["axum", "sea-orm", "microservice", "mysql", "openapi"]
+categories = ["web-programming", "web-programming::http-server"]
