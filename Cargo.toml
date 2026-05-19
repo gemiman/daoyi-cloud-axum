@@ -41,5 +41,5 @@ categories = ["web-programming", "web-programming::http-server"]
 
 [workspace.dependencies]
 # third party
-axum = { version = "0.8.9" }
+axum = { version = "0.8.9", features = ["macros"] }
 tokio = { version = "1.52.3", features = ["full"] }
