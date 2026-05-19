@@ -16,3 +16,6 @@ axum.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
+config.workspace = true
+serde.workspace = true
+anyhow.workspace = true
