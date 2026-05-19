@@ -43,3 +43,5 @@ categories = ["web-programming", "web-programming::http-server"]
 # third party
 axum = { version = "0.8.9", features = ["macros"] }
 tokio = { version = "1.52.3", features = ["full"] }
+tracing = { version = "0.1.44", features = ["async-await"] }
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "chrono"] }
