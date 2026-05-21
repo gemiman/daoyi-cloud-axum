@@ -5,6 +5,7 @@
 
 pub mod api;
 pub mod app;
+pub mod common;
 pub mod config;
 pub mod database;
 pub mod demo;
@@ -13,6 +14,7 @@ pub mod latency;
 pub mod logger;
 pub mod response;
 pub mod sea_orm_utils;
+pub mod serde;
 pub mod server;
 
 /// 主入口函数。
