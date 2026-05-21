@@ -27,7 +27,7 @@ pub async fn init() -> anyhow::Result<DatabaseConnection> {
         .set_schema_search_path(database_config.schema());
     let db = Database::connect(options).await?;
     db.ping().await?;
-    tracing::info!("数据库连接成功");
+    tracing::info!("{} 数据库连接成功", db.get_database_backend().as_str());
     log_database_version(&db).await?;
     Ok(db)
 }
