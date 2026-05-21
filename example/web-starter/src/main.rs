@@ -7,6 +7,7 @@ pub mod config;
 pub mod database;
 pub mod demo;
 pub mod logger;
+pub mod sea_orm_utils;
 
 use crate::demo::entity::demo_sys_user;
 use axum::extract::State;
