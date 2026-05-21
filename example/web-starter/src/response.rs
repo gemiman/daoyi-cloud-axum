@@ -1,5 +1,8 @@
+use crate::error::{ApiError, ApiResult};
 use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
+
+pub type CommonResult<T> = ApiResult<ApiResponse<T>>;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ApiResponse<T> {
@@ -31,4 +34,12 @@ impl<T: Serialize> IntoResponse for ApiResponse<T> {
     fn into_response(self) -> Response {
         axum::Json(self).into_response()
     }
+}
+
+pub fn success<T: Serialize>(data: T) -> CommonResult<T> {
+    Ok(ApiResponse::ok(Some(data)))
+}
+
+pub fn fail<M: AsRef<str>>(msg: M) -> CommonResult<()> {
+    Err(ApiError::Biz(String::from(msg.as_ref())))
 }

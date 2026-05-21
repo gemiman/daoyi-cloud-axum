@@ -1,8 +1,7 @@
 use crate::app::AppState;
 use crate::demo::entity::demo_sys_user;
 use crate::demo::entity::prelude::*;
-use crate::error::ApiResult;
-use crate::response::ApiResponse;
+use crate::response::{CommonResult, success};
 use axum::extract::State;
 use axum::{Router, debug_handler, routing};
 use sea_orm::Condition;
@@ -15,7 +14,7 @@ pub fn create_router() -> Router<AppState> {
 #[debug_handler]
 async fn query_users(
     State(AppState { db }): State<AppState>,
-) -> ApiResult<ApiResponse<Vec<demo_sys_user::Model>>> {
+) -> CommonResult<Vec<demo_sys_user::Model>> {
     let users = DemoSysUser::find()
         .filter(demo_sys_user::Column::Gender.eq("female"))
         .filter(
@@ -31,5 +30,5 @@ async fn query_users(
         .all(&db)
         .await
         .unwrap();
-    Ok(ApiResponse::ok(Some(users)))
+    success(users)
 }
