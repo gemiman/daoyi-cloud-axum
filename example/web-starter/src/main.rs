@@ -9,6 +9,7 @@ pub mod config;
 pub mod database;
 pub mod demo;
 pub mod error;
+pub mod latency;
 pub mod logger;
 pub mod response;
 pub mod sea_orm_utils;

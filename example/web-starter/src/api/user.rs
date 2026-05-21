@@ -11,10 +11,12 @@ pub fn create_router() -> Router<AppState> {
     Router::new().route("/", routing::get(query_users))
 }
 
+#[tracing::instrument(name = "query_users", skip_all, fields(target = "只是为了演示。。。"))]
 #[debug_handler]
 async fn query_users(
     State(AppState { db }): State<AppState>,
 ) -> CommonResult<Vec<demo_sys_user::Model>> {
+    tracing::info!("开始处理业务……");
     let users = DemoSysUser::find()
         .filter(demo_sys_user::Column::Gender.eq("female"))
         .filter(

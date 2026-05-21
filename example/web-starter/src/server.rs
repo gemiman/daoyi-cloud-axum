@@ -1,10 +1,11 @@
 use crate::app::AppState;
 use crate::config::ServerConfig;
+use crate::latency::LatencyOnResponse;
 use axum::Router;
-use axum::extract::Request;
+use axum::extract::{ConnectInfo, Request};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use tower_http::trace::{DefaultOnResponse, TraceLayer};
+use tower_http::trace::TraceLayer;
 
 pub struct Server {
     config: &'static ServerConfig,
@@ -36,11 +37,16 @@ impl Server {
                 let method = request.method();
                 let path = request.uri().path();
                 let id = xid::new();
-                tracing::info_span!("HTTP Request", id = %id, method = %method, path = %path)
+                // 从请求扩展中获取 ConnectInfo
+                let ip = request.extensions()
+                    .get::<ConnectInfo<SocketAddr>>()
+                    .map(|connect_info| connect_info.0.ip())
+                    .unwrap_or_else(|| std::net::IpAddr::V4(std::net::Ipv4Addr::UNSPECIFIED));
+                tracing::info_span!("HTTP Request", id = %id, ip = %ip, method = %method, path = %path)
             })
             .on_request(())
             .on_failure(())
-            .on_response(DefaultOnResponse::new().level(tracing::Level::INFO));
+            .on_response(LatencyOnResponse);
         Router::new().merge(router).layer(tracing).with_state(state)
     }
 }
