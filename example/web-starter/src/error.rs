@@ -14,6 +14,8 @@ pub enum ApiError {
     Biz(String),
     #[error("内部错误:{0}")]
     Internal(#[from] anyhow::Error),
+    #[error("数据库错误:{0}")]
+    Db(#[from] sea_orm::DbErr),
 }
 
 impl ApiError {
@@ -21,7 +23,7 @@ impl ApiError {
         match self {
             ApiError::NotFound => StatusCode::NOT_FOUND,
             ApiError::MethodNotAllowed => StatusCode::METHOD_NOT_ALLOWED,
-            ApiError::Internal(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::Internal(_) | ApiError::Db(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::Biz(_) => StatusCode::OK,
         }
     }

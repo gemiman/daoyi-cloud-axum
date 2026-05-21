@@ -28,7 +28,6 @@ async fn query_users(
                 .add(demo_sys_user::Column::Name.ends_with("四")),
         )
         .all(&db)
-        .await
-        .unwrap();
+        .await?;
     success(users)
 }
