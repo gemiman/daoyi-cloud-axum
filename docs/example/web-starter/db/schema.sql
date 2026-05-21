@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS demo_sys_user
     password      VARCHAR(64)                                                  NOT NULL,
     mobile_phone  VARCHAR(16)                                                  NOT NULL,
     birthday      DATE                                                         NOT NULL,
-    enabled       BOOLEAN                                                               DEFAULT TRUE NOT NULL,
+    enabled bit(1) DEFAULT b'1' NOT NULL,
     `creator`     varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL     DEFAULT '' COMMENT '创建者',
     `create_time` datetime                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `updater`     varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL     DEFAULT '' COMMENT '更新者',
@@ -27,13 +27,13 @@ CREATE TABLE IF NOT EXISTS demo_sys_user
 
 INSERT INTO demo_sys_user (id, name, gender, account, password, mobile_phone, birthday, enabled)
 VALUES (1, '李四', 'female', 'lisi', '$2b$12$PsumwxjxX/o1RNOKpkc.Kuxea0izqSuhaod4PCudXoRh3zet1TASK',
-        '17361631996', '2025-05-13', TRUE);
+        '17361631996', '2025-05-13', b'1');
 INSERT INTO demo_sys_user (id, name, gender, account, password, mobile_phone, birthday, enabled)
 VALUES (2, '张三', 'male', 'admin', '$2b$12$PsumwxjxX/o1RNOKpkc.Kuxea0izqSuhaod4PCudXoRh3zet1TASK',
-        '19909407240', '2025-05-18', FALSE);
+        '19909407240', '2025-05-18', b'0');
 INSERT INTO demo_sys_user (id, name, gender, account, password, mobile_phone, birthday, enabled)
 VALUES (3, '赵六', 'female', 'zhaoliu', '$2b$12$EJOKHLJLnfHrgrXbZl8uge3N4VEgR9FWHwq3a6pgTIM8O66Lf/9DW',
-        '18361631783', '2025-06-11', TRUE);
+        '18361631783', '2025-06-11', b'1');
 
 commit;
 
