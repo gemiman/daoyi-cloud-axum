@@ -79,6 +79,7 @@ serde = { version = "1.0.228", features = ["derive"] }
 
 # --- Error Handling ---
 anyhow = { version = "1.0.102" }
+thiserror = { version = "2.0.18" }
 
 sea-orm = { version = "2.0.0-rc.38", features = [
     "with-chrono",

@@ -21,3 +21,4 @@ serde.workspace = true
 anyhow.workspace = true
 sea-orm.workspace = true
 num_cpus.workspace = true
+thiserror.workspace = true
