@@ -68,6 +68,7 @@ categories = ["web-programming", "web-programming::http-server"]
 # --- Web / Async ---
 axum = { version = "0.8.9", features = ["macros"] }
 tokio = { version = "1.52.3", features = ["full"] }
+tower-http = { version = "0.6.11", features = ["trace"] }
 
 # --- Observability ---
 tracing = { version = "0.1.44", features = ["async-await"] }
@@ -88,3 +89,4 @@ sea-orm = { version = "2.0.0-rc.38", features = [
     "with-rust_decimal",
     "runtime-tokio"] }
 num_cpus = { version = "1.17.0" }
+xid = { version = "1.1.1" }

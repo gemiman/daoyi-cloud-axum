@@ -1,8 +1,10 @@
 use crate::app::AppState;
 use crate::config::ServerConfig;
 use axum::Router;
+use axum::extract::Request;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
+use tower_http::trace::{DefaultOnResponse, TraceLayer};
 
 pub struct Server {
     config: &'static ServerConfig,
@@ -29,6 +31,16 @@ impl Server {
     }
 
     fn build_router(&self, state: AppState, router: Router<AppState>) -> Router {
-        Router::new().merge(router).with_state(state)
+        let tracing = TraceLayer::new_for_http()
+            .make_span_with(|request: &Request| {
+                let method = request.method();
+                let path = request.uri().path();
+                let id = xid::new();
+                tracing::info_span!("HTTP Request", id = %id, method = %method, path = %path)
+            })
+            .on_request(())
+            .on_failure(())
+            .on_response(DefaultOnResponse::new().level(tracing::Level::INFO));
+        Router::new().merge(router).layer(tracing).with_state(state)
     }
 }
