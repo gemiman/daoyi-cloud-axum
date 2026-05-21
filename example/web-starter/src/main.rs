@@ -3,12 +3,15 @@
 //! 本 crate 演示如何使用 `axum` 搭建一个最小化的 HTTP 服务器，
 //! 包括路由注册、配置加载、日志初始化等基础功能。
 
+pub mod app;
 pub mod config;
 pub mod database;
 pub mod demo;
 pub mod logger;
 pub mod sea_orm_utils;
+pub mod server;
 
+use crate::app::AppState;
 use crate::demo::entity::demo_sys_user;
 use axum::extract::State;
 use axum::response::IntoResponse;
@@ -16,7 +19,6 @@ use axum::{Router, debug_handler, routing};
 use demo::entity::prelude::*;
 use sea_orm::Condition;
 use sea_orm::prelude::*;
-use tokio::net::TcpListener;
 
 /// 主入口函数。
 ///
@@ -27,21 +29,11 @@ use tokio::net::TcpListener;
 /// 4. 绑定端口并启动 HTTP 服务
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    logger::init();
-    let db = database::init().await?;
-    let port = config::get().server().port();
-
     let router = Router::new()
         .route("/", routing::get(index))
-        .route("/users", routing::get(query_users))
-        .with_state(db);
+        .route("/users", routing::get(query_users));
 
-    let listener = TcpListener::bind(format!("0.0.0.0:{port}")).await?;
-
-    tracing::info!("Listening on {}://{}", "http", listener.local_addr()?);
-
-    axum::serve(listener, router).await?;
-    Ok(())
+    app::run(router).await
 }
 
 /// 根路径 `/` 的 GET 处理器。
@@ -54,7 +46,7 @@ async fn index() -> &'static str {
 }
 
 #[debug_handler]
-async fn query_users(State(db): State<DatabaseConnection>) -> impl IntoResponse {
+async fn query_users(State(AppState { db }): State<AppState>) -> impl IntoResponse {
     let users = DemoSysUser::find()
         .filter(demo_sys_user::Column::Gender.eq("female"))
         .filter(
