@@ -36,7 +36,7 @@ impl<T: Serialize> IntoResponse for ApiResponse<T> {
     }
 }
 
-pub fn success<T: Serialize>(data: T) -> CommonResult<T> {
+pub fn success<T>(data: T) -> CommonResult<T> {
     Ok(ApiResponse::ok(Some(data)))
 }
 
