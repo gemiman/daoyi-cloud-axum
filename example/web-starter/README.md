@@ -43,3 +43,18 @@ server:
 | `main`   | 服务入口，路由注册与启动     |
 | `logger` | tracing 日志订阅器初始化 |
 | `config` | YAML 配置加载与反序列化   |
+
+## 开发指南
+
+### 生成 SeaORM Entity
+
+```shell
+cargo install sea-orm-cli@^2.0.0-rc
+cd crates/libs/entities/daoyi-entity-demo
+sea-orm-cli generate entity \
+  -u mysql://root:123456@127.0.0.1:3306/demo \
+  --with-serde both \
+  --model-extra-attributes 'serde(rename_all = "camelCase")' \
+  --date-time-crate chrono \
+  -o ./src/demo/entity
+```
