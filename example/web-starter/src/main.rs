@@ -4,6 +4,7 @@
 //! 包括路由注册、配置加载、日志初始化等基础功能。
 
 pub mod config;
+pub mod database;
 pub mod logger;
 
 use axum::{Router, debug_handler, routing};
@@ -17,21 +18,19 @@ use tokio::net::TcpListener;
 /// 3. 注册路由
 /// 4. 绑定端口并启动 HTTP 服务
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     logger::init();
-    let port = config::get().server.port();
+    let _db = database::init().await?;
+    let port = config::get().server().port();
 
     let router = Router::new().route("/", routing::get(index));
 
-    let listener = TcpListener::bind(format!("0.0.0.0:{port}")).await.unwrap();
+    let listener = TcpListener::bind(format!("0.0.0.0:{port}")).await?;
 
-    tracing::info!(
-        "Listening on {}://{}",
-        "http",
-        listener.local_addr().unwrap()
-    );
+    tracing::info!("Listening on {}://{}", "http", listener.local_addr()?);
 
-    axum::serve(listener, router).await.unwrap();
+    axum::serve(listener, router).await?;
+    Ok(())
 }
 
 /// 根路径 `/` 的 GET 处理器。
@@ -40,5 +39,5 @@ async fn main() {
 /// 编译期获得更好的类型错误提示。
 #[debug_handler]
 async fn index() -> &'static str {
-    "Hello Daoyi Cloud Axum !"
+    "Hello DaoYi Cloud Axum !"
 }

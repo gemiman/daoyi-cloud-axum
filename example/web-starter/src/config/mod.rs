@@ -15,10 +15,12 @@
 //! let port = config::get().server.port();
 //! ```
 
+pub mod database;
 pub mod server;
 
 use anyhow::Context;
 use config::{Config, FileFormat};
+pub use database::DatabaseConfig;
 use serde::Deserialize;
 pub use server::ServerConfig;
 use std::sync::LazyLock;
@@ -36,7 +38,8 @@ static CONFIG: LazyLock<AppConfig> =
 #[derive(Debug, Deserialize)]
 pub struct AppConfig {
     /// 服务器相关配置。
-    pub server: ServerConfig,
+    server: ServerConfig,
+    database: DatabaseConfig,
 }
 
 impl AppConfig {
@@ -99,6 +102,14 @@ impl AppConfig {
             .with_context(|| anyhow::anyhow!("Failed to load config"))?
             .try_deserialize()
             .with_context(|| anyhow::anyhow!("Failed to deserialize config"))
+    }
+
+    pub fn server(&self) -> &ServerConfig {
+        &self.server
+    }
+
+    pub fn database(&self) -> &DatabaseConfig {
+        &self.database
     }
 }
 
