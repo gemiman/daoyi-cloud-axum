@@ -2,9 +2,16 @@ use crate::app::AppState;
 use crate::config::ServerConfig;
 use crate::latency::LatencyOnResponse;
 use axum::Router;
-use axum::extract::{ConnectInfo, Request};
+use axum::extract::{ConnectInfo, DefaultBodyLimit, Request};
+use axum::http::StatusCode;
+use bytesize::ByteSize;
 use std::net::SocketAddr;
+use std::time::Duration;
 use tokio::net::TcpListener;
+use tower_http::cors;
+use tower_http::cors::CorsLayer;
+use tower_http::normalize_path::NormalizePathLayer;
+use tower_http::timeout::TimeoutLayer;
 use tower_http::trace::TraceLayer;
 
 pub struct Server {
@@ -47,6 +54,23 @@ impl Server {
             .on_request(())
             .on_failure(())
             .on_response(LatencyOnResponse);
-        Router::new().merge(router).layer(tracing).with_state(state)
+        let timeout =
+            TimeoutLayer::with_status_code(StatusCode::REQUEST_TIMEOUT, Duration::from_secs(120));
+        let body_limit = DefaultBodyLimit::max(ByteSize::gib(2).as_u64() as usize);
+        let cors = CorsLayer::new()
+            .allow_origin(cors::Any)
+            .allow_methods(cors::Any)
+            .allow_headers(cors::Any)
+            .allow_credentials(false)
+            .max_age(Duration::from_secs(3600 * 12));
+        let normalize_path = NormalizePathLayer::trim_trailing_slash();
+        Router::new()
+            .merge(router)
+            .layer(timeout)
+            .layer(body_limit)
+            .layer(tracing)
+            .layer(cors)
+            .layer(normalize_path)
+            .with_state(state)
     }
 }
