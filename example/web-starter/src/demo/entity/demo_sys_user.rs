@@ -2,6 +2,7 @@
 //!
 //! 对应数据库表 `demo_sys_user`（系统用户表）。
 
+use crate::enumeration::Gender;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
@@ -22,7 +23,7 @@ pub struct Model {
     pub name: String,
 
     /// 性别。
-    pub gender: String,
+    pub gender: Gender,
 
     /// 账号。
     pub account: String,

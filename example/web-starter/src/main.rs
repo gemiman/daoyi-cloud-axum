@@ -9,6 +9,7 @@ pub mod common;
 pub mod config;
 pub mod database;
 pub mod demo;
+pub mod enumeration;
 pub mod error;
 pub mod id;
 pub mod json;

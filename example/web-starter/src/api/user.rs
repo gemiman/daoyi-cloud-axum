@@ -14,6 +14,7 @@ use crate::common::{PageParam, PageResult};
 use crate::demo::entity::demo_sys_user;
 use crate::demo::entity::demo_sys_user::ActiveModel;
 use crate::demo::entity::prelude::*;
+use crate::enumeration::Gender;
 use crate::error::ApiError;
 use crate::passwd::hash_passwd;
 use crate::path::Path;
@@ -127,7 +128,7 @@ pub struct UserParams {
     pub name: String,
 
     /// 性别。
-    pub gender: String,
+    pub gender: Gender,
 
     /// 账号，长度 1-16。
     #[validate(length(min = 1, max = 16, message = "账号长度必须在1-16之间"))]
