@@ -24,6 +24,7 @@ publish = false
 members = [
     ".",
     "crates/libs/*",
+    "crates/sea-orm-entities/*",
     "example/*",
 ]
 resolver = "2"
@@ -69,6 +70,11 @@ categories = ["web-programming", "web-programming::http-server"]
 [workspace.dependencies]
 # --- 通用 ---
 daoyi-axum-config = { version = "0.1.0", path = "crates/libs/daoyi-axum-config" }
+daoyi-axum-support = { version = "0.1.0", path = "crates/libs/daoyi-axum-support" }
+daoyi-axum-app = { version = "0.1.0", path = "crates/libs/daoyi-axum-app" }
+
+# --- 实体 ---
+daoyi-sea-orm-entity-demo = { version = "0.1.0", path = "crates/sea-orm-entities/daoyi-sea-orm-entity-demo" }
 
 # --- Web / Async ---
 axum = { version = "0.8.9", features = ["macros"] }

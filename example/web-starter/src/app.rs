@@ -3,9 +3,10 @@
 //! 定义了全局共享的 [`AppState`] 以及服务启动入口 [`run`]。
 //! `run` 按顺序完成日志初始化、数据库连接、配置加载、HTTP 服务启动等步骤。
 
-use crate::{database, id, logger, server};
+use crate::{database, server};
 use axum::Router;
 use daoyi_axum_config::config;
+use daoyi_axum_support::support::{id, logger};
 use sea_orm::DatabaseConnection;
 
 /// 全局应用状态，通过 Axum 的 [`State`](axum::extract::State) 提取器在

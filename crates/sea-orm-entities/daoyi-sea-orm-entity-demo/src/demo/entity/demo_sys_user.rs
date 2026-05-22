@@ -2,7 +2,7 @@
 //!
 //! 对应数据库表 `demo_sys_user`（系统用户表）。
 
-use crate::enumeration::Gender;
+use daoyi_axum_support::support::enumeration::Gender;
 use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 

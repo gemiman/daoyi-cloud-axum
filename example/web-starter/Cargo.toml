@@ -17,6 +17,8 @@ publish = false
 # =============================================================================
 [dependencies]
 daoyi-axum-config.workspace = true
+daoyi-axum-support.workspace = true
+daoyi-sea-orm-entity-demo.workspace = true
 
 # --- Web 框架 ---
 axum.workspace = true
@@ -27,7 +29,6 @@ tokio.workspace = true
 
 # --- 可观测性 ---
 tracing.workspace = true
-tracing-subscriber.workspace = true
 
 # --- 配置管理 ---
 serde.workspace = true
@@ -43,8 +44,6 @@ sea-orm.workspace = true
 num_cpus.workspace = true    # CPU 核心数检测（用于连接池大小计算）
 xid.workspace = true         # 全局唯一 ID 生成（请求追踪）
 bytesize.workspace = true    # 人类可读的字节大小表示
-idgenerator.workspace = true
-bcrypt.workspace = true
 
 # --- 参数校验 ---
 validator.workspace = true
