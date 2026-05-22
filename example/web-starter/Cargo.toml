@@ -27,3 +27,4 @@ xid.workspace = true
 bytesize.workspace = true
 validator.workspace = true
 axum-valid.workspace = true
+regex.workspace = true

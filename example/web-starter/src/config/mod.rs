@@ -17,6 +17,7 @@
 
 pub mod database;
 pub mod server;
+pub mod sys;
 
 use anyhow::Context;
 use config::{Config, FileFormat};
@@ -24,6 +25,7 @@ pub use database::DatabaseConfig;
 use serde::Deserialize;
 pub use server::ServerConfig;
 use std::sync::LazyLock;
+pub use sys::SysConfig;
 
 /// 全局配置单例。
 ///
@@ -40,6 +42,7 @@ pub struct AppConfig {
     /// 服务器相关配置。
     server: ServerConfig,
     database: DatabaseConfig,
+    sys: SysConfig,
 }
 
 impl AppConfig {
@@ -110,6 +113,10 @@ impl AppConfig {
 
     pub fn database(&self) -> &DatabaseConfig {
         &self.database
+    }
+
+    pub fn sys(&self) -> &SysConfig {
+        &self.sys
     }
 }
 

@@ -20,6 +20,7 @@ pub mod sea_orm_utils;
 pub mod serde;
 pub mod server;
 pub mod valid;
+pub mod validation;
 
 /// 主入口函数。
 ///

@@ -7,3 +7,9 @@ database:
   user: root
   password: 123456
   database: demo
+
+sys:
+  page_size_min: 10
+  page_size_max: 100
+  page_size_default: 20
+  page_no_default: 1

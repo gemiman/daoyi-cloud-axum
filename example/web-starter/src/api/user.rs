@@ -1,9 +1,11 @@
 use crate::app::AppState;
 use crate::common::{PageParam, PageResult};
 use crate::demo::entity::demo_sys_user;
+use crate::demo::entity::demo_sys_user::ActiveModel;
 use crate::demo::entity::prelude::*;
 use crate::response::{CommonResult, success};
 use crate::valid::ValidQuery;
+use crate::validation::validate_mobile_phone;
 use axum::extract::State;
 use axum::{Router, debug_handler, routing};
 use sea_orm::prelude::*;
@@ -71,4 +73,21 @@ async fn query_users(
         .all(&db)
         .await?;
     success(users)
+}
+
+#[derive(Debug, Deserialize, Validate, DeriveIntoActiveModel)]
+#[serde(rename_all = "camelCase")]
+pub struct UserParams {
+    #[validate(length(min = 1, max = 16, message = "姓名长度必须在1-16之间"))]
+    pub name: String,
+    pub gender: String,
+    #[validate(length(min = 1, max = 16, message = "账号长度必须在1-16之间"))]
+    pub account: String,
+    #[validate(length(min = 6, max = 16, message = "密码长度必须在6-16之间"))]
+    pub password: String,
+    #[validate(custom(function = "validate_mobile_phone"))]
+    pub mobile_phone: String,
+    pub birthday: Date,
+    #[serde(default)]
+    pub enabled: bool,
 }

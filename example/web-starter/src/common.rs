@@ -1,9 +1,8 @@
+use crate::config;
 use crate::serde::deserialize_number;
+use crate::validation::validate_page_size;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
-
-const DEFAULT_PAGE_NO: u64 = 1;
-const DEFAULT_PAGE_SIZE: u64 = 10;
 
 #[derive(Debug, Clone, PartialEq, Eq, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
@@ -11,17 +10,17 @@ pub struct PageParam {
     #[validate(range(min = 1, message = "页码最小值为 1"))]
     #[serde(default = "default_page_no", deserialize_with = "deserialize_number")]
     pub page_no: u64,
-    #[validate(range(min = 1, max = 200, message = "每页条数最小值为 1,最大值为 200"))]
+    #[validate(custom(function = "validate_page_size"))]
     #[serde(default = "default_page_size", deserialize_with = "deserialize_number")]
     pub page_size: u64,
 }
 
 fn default_page_no() -> u64 {
-    DEFAULT_PAGE_NO
+    config::get().sys().page_no_default()
 }
 
 fn default_page_size() -> u64 {
-    DEFAULT_PAGE_SIZE
+    config::get().sys().page_size_default()
 }
 
 #[derive(Debug, Serialize)]
