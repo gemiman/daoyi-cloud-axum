@@ -97,19 +97,19 @@ async fn query_users(
 ) -> CommonResult<Vec<demo_sys_user::Model>> {
     tracing::info!("开始处理业务……");
     let users = DemoSysUser::find()
-        .filter(demo_sys_user::Column::Gender.eq("female"))
-        // ALL：所有条件必须同时满足
-        .filter(
-            Condition::all()
-                .add(demo_sys_user::Column::Name.starts_with("李"))
-                .add(demo_sys_user::Column::Name.ends_with("四")),
-        )
-        // ANY：任一条件满足即可（此处仅为语法演示）
-        .filter(
-            Condition::any()
-                .add(demo_sys_user::Column::Name.starts_with("李"))
-                .add(demo_sys_user::Column::Name.ends_with("四")),
-        )
+        // .filter(demo_sys_user::Column::Gender.eq("female"))
+        // // ALL：所有条件必须同时满足
+        // .filter(
+        //     Condition::all()
+        //         .add(demo_sys_user::Column::Name.starts_with("李"))
+        //         .add(demo_sys_user::Column::Name.ends_with("四")),
+        // )
+        // // ANY：任一条件满足即可（此处仅为语法演示）
+        // .filter(
+        //     Condition::any()
+        //         .add(demo_sys_user::Column::Name.starts_with("李"))
+        //         .add(demo_sys_user::Column::Name.ends_with("四")),
+        // )
         .all(&db)
         .await?;
     success(users)
@@ -185,10 +185,7 @@ async fn update(
 }
 
 #[debug_handler]
-async fn delete(
-    State(AppState { db }): State<AppState>,
-    Path(id): Path<i64>,
-) -> CommonResult<bool> {
-    let _result = DemoSysUser::delete_by_id(id).exec(&db).await?;
-    success(true)
+async fn delete(State(AppState { db }): State<AppState>, Path(id): Path<i64>) -> CommonResult<u64> {
+    let result = DemoSysUser::delete_by_id(id).exec(&db).await?;
+    success(result.rows_affected)
 }

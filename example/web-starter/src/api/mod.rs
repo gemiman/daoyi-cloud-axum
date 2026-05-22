@@ -16,6 +16,7 @@
 
 use crate::app::AppState;
 use crate::error::{ApiError, ApiResult};
+use crate::response::{CommonResult, success};
 use axum::{Router, debug_handler, routing};
 
 pub mod user;
@@ -48,6 +49,6 @@ pub fn create_router() -> Router<AppState> {
 /// 返回一段静态欢迎文本。使用 `#[debug_handler]` 宏以便在
 /// 编译期获得更好的类型错误提示。
 #[debug_handler]
-async fn index() -> &'static str {
-    "Hello DaoYi Cloud Axum !"
+async fn index() -> CommonResult<&'static str> {
+    success("Hello DaoYi Cloud Axum !")
 }
