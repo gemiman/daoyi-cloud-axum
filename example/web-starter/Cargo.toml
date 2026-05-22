@@ -16,13 +16,12 @@ publish = false
 # 所有依赖版本由 workspace 统一管理，此处仅声明使用哪些依赖
 # =============================================================================
 [dependencies]
-daoyi-axum-config.workspace = true
+daoyi-axum-app.workspace = true
 daoyi-axum-support.workspace = true
 daoyi-sea-orm-entity-demo.workspace = true
 
 # --- Web 框架 ---
 axum.workspace = true
-tower-http.workspace = true
 
 # --- 异步运行时 ---
 tokio.workspace = true
@@ -39,11 +38,5 @@ anyhow.workspace = true
 # --- ORM 数据库 ---
 sea-orm.workspace = true
 
-# --- 工具库 ---
-num_cpus.workspace = true    # CPU 核心数检测（用于连接池大小计算）
-xid.workspace = true         # 全局唯一 ID 生成（请求追踪）
-bytesize.workspace = true    # 人类可读的字节大小表示
-
 # --- 参数校验 ---
 validator.workspace = true
-regex.workspace = true

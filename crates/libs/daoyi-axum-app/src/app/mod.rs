@@ -3,7 +3,12 @@
 //! 定义了全局共享的 [`AppState`] 以及服务启动入口 [`run`]。
 //! `run` 按顺序完成日志初始化、数据库连接、配置加载、HTTP 服务启动等步骤。
 
-use crate::{database, server};
+pub mod common;
+pub mod database;
+pub mod sea_orm_utils;
+pub mod server;
+pub mod validation;
+
 use axum::Router;
 use daoyi_axum_config::config;
 use daoyi_axum_support::support::{id, logger};

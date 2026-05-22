@@ -3,13 +3,9 @@
 //! 本 crate 演示如何使用 `axum` 搭建一个最小化的 HTTP 服务器，
 //! 包括路由注册、配置加载、日志初始化等基础功能。
 
+use daoyi_axum_app::app;
+
 pub mod api;
-pub mod app;
-pub mod common;
-pub mod database;
-pub mod sea_orm_utils;
-pub mod server;
-pub mod validation;
 
 /// 主入口函数。
 ///

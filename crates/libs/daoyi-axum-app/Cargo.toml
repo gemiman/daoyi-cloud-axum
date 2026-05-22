@@ -12,3 +12,18 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
+daoyi-axum-support.workspace = true
+daoyi-axum-config.workspace = true
+
+sea-orm.workspace = true
+axum.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+serde.workspace = true
+validator.workspace = true
+num_cpus.workspace = true    # CPU 核心数检测（用于连接池大小计算）
+regex.workspace = true
+xid.workspace = true         # 全局唯一 ID 生成（请求追踪）
+bytesize.workspace = true    # 人类可读的字节大小表示
+tokio.workspace = true
+tower-http.workspace = true

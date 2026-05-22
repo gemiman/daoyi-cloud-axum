@@ -14,8 +14,8 @@
 //! 子模块：
 //! - [`user`] — 用户相关 API
 
-use crate::app::AppState;
 use axum::{Router, debug_handler, routing};
+use daoyi_axum_app::app::AppState;
 use daoyi_axum_support::support::error::{ApiError, ApiResult};
 use daoyi_axum_support::support::response::{CommonResult, success};
 

@@ -13,11 +13,11 @@
 //! | PUT | `/api/users/{id}` | 更新用户 |
 //! | DELETE | `/api/users/{id}` | 删除用户 |
 
-use crate::app::AppState;
-use crate::common::{PageParam, PageResult};
-use crate::validation::validate_mobile_phone;
 use axum::extract::State;
 use axum::{Router, debug_handler, routing};
+use daoyi_axum_app::app::AppState;
+use daoyi_axum_app::app::common::{PageParam, PageResult};
+use daoyi_axum_app::app::validation::validate_mobile_phone;
 use daoyi_axum_support::support::enumeration::Gender;
 use daoyi_axum_support::support::error::ApiError;
 use daoyi_axum_support::support::passwd::hash_passwd;
