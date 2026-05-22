@@ -35,7 +35,6 @@ serde.workspace = true
 
 # --- 错误处理 ---
 anyhow.workspace = true
-thiserror.workspace = true
 
 # --- ORM 数据库 ---
 sea-orm.workspace = true
@@ -47,5 +46,4 @@ bytesize.workspace = true    # 人类可读的字节大小表示
 
 # --- 参数校验 ---
 validator.workspace = true
-axum-valid.workspace = true
 regex.workspace = true

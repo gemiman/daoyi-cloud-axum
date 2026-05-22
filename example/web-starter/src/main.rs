@@ -7,14 +7,8 @@ pub mod api;
 pub mod app;
 pub mod common;
 pub mod database;
-pub mod error;
-pub mod json;
-pub mod path;
-pub mod query;
-pub mod response;
 pub mod sea_orm_utils;
 pub mod server;
-pub mod valid;
 pub mod validation;
 
 /// 主入口函数。

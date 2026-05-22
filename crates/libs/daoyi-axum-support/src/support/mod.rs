@@ -1,6 +1,12 @@
 pub mod enumeration;
+pub mod error;
 pub mod id;
+pub mod json;
 pub mod latency;
 pub mod logger;
 pub mod passwd;
+pub mod path;
+pub mod query;
+pub mod response;
 pub mod serde;
+pub mod valid;

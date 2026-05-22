@@ -3,7 +3,7 @@
 //! 对 [`axum::extract::Path`] 的薄封装，将路径参数解析错误自动映射为 [`ApiError::Path`]，
 //! 并实现 [`HasValidate`](axum_valid::HasValidate) trait 以支持参数校验。
 
-use crate::error::ApiError;
+use crate::support::error::ApiError;
 use axum::extract::FromRequestParts;
 use axum_valid::HasValidate;
 

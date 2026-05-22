@@ -15,9 +15,9 @@
 //! - [`user`] — 用户相关 API
 
 use crate::app::AppState;
-use crate::error::{ApiError, ApiResult};
-use crate::response::{CommonResult, success};
 use axum::{Router, debug_handler, routing};
+use daoyi_axum_support::support::error::{ApiError, ApiResult};
+use daoyi_axum_support::support::response::{CommonResult, success};
 
 pub mod user;
 

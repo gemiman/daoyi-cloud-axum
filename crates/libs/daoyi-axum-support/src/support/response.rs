@@ -16,7 +16,7 @@
 //! - `code = 0` 表示成功，`code = 1` 表示失败
 //! - `data` 字段在值为 `None` 时自动省略
 
-use crate::error::{ApiError, ApiResult};
+use crate::support::error::{ApiError, ApiResult};
 use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
 

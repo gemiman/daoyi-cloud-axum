@@ -3,7 +3,7 @@
 //! 对 [`axum::extract::Json`] 的薄封装，将 JSON 解析错误自动映射为 [`ApiError::Json`]，
 //! 并实现 [`HasValidate`](axum_valid::HasValidate) trait 以支持参数校验。
 
-use crate::error::ApiError;
+use crate::support::error::ApiError;
 use axum::extract::FromRequest;
 use axum_valid::HasValidate;
 
