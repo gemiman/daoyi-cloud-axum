@@ -5,9 +5,11 @@ use crate::demo::entity::prelude::*;
 use crate::response::{CommonResult, success};
 use axum::extract::{Query, State};
 use axum::{Router, debug_handler, routing};
+use axum_valid::Valid;
 use sea_orm::prelude::*;
 use sea_orm::{Condition, QueryTrait};
 use serde::Deserialize;
+use validator::Validate;
 
 pub fn create_router() -> Router<AppState> {
     Router::new()
@@ -15,10 +17,11 @@ pub fn create_router() -> Router<AppState> {
         .route("/page", routing::get(find_page))
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Validate)]
 #[serde(rename_all = "camelCase")]
 pub struct UserQueryParams {
     keyword: Option<String>,
+    #[validate(nested)]
     #[serde(flatten)]
     pagination: PageParam,
 }
@@ -26,10 +29,10 @@ pub struct UserQueryParams {
 #[debug_handler]
 async fn find_page(
     State(AppState { db }): State<AppState>,
-    Query(UserQueryParams {
+    Valid(Query(UserQueryParams {
         keyword,
         pagination,
-    }): Query<UserQueryParams>,
+    })): Valid<Query<UserQueryParams>>,
 ) -> CommonResult<PageResult<demo_sys_user::Model>> {
     let paginator = DemoSysUser::find()
         .apply_if(keyword.as_ref(), |query, var| {
