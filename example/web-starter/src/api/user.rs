@@ -14,13 +14,14 @@ use crate::common::{PageParam, PageResult};
 use crate::demo::entity::demo_sys_user;
 use crate::demo::entity::demo_sys_user::ActiveModel;
 use crate::demo::entity::prelude::*;
+use crate::passwd::hash_passwd;
 use crate::response::{CommonResult, success};
 use crate::valid::{ValidJson, ValidQuery};
 use crate::validation::validate_mobile_phone;
 use axum::extract::State;
 use axum::{Router, debug_handler, routing};
 use sea_orm::prelude::*;
-use sea_orm::{Condition, IntoActiveModel, QueryTrait};
+use sea_orm::{ActiveValue, Condition, IntoActiveModel, QueryTrait};
 use serde::Deserialize;
 use validator::Validate;
 
@@ -29,6 +30,7 @@ pub fn create_router() -> Router<AppState> {
     Router::new()
         .route("/", routing::get(query_users))
         .route("/page", routing::get(find_page))
+        .route("/", routing::post(create))
 }
 
 /// 用户分页查询参数。
@@ -148,7 +150,9 @@ async fn create(
     State(AppState { db }): State<AppState>,
     ValidJson(params): ValidJson<UserParams>,
 ) -> CommonResult<i64> {
-    let active_model = params.into_active_model();
+    let password = hash_passwd(&params.password)?;
+    let mut active_model = params.into_active_model();
+    active_model.password = ActiveValue::Set(password);
     let result = active_model.insert(&db).await?;
     success(result.id)
 }

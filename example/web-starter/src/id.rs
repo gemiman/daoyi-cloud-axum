@@ -9,7 +9,7 @@ pub fn init() -> anyhow::Result<()> {
                 .and_hms_opt(0, 0, 0)
                 .unwrap()
                 .and_utc()
-                .timestamp(),
+                .timestamp_millis(),
         )
         .worker_id(1)
         .worker_id_bit_len(4);

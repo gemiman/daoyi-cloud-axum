@@ -42,6 +42,7 @@ num_cpus.workspace = true    # CPU 核心数检测（用于连接池大小计算
 xid.workspace = true         # 全局唯一 ID 生成（请求追踪）
 bytesize.workspace = true    # 人类可读的字节大小表示
 idgenerator.workspace = true
+bcrypt.workspace = true
 
 # --- 参数校验 ---
 validator.workspace = true
