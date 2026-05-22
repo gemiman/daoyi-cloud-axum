@@ -3,7 +3,7 @@
 //! 基于 SeaORM 建立数据库连接池，支持 MySQL、PostgreSQL、SQLite 三种数据库后端。
 //! 连接池大小根据 CPU 核心数自动计算：最小 `cpu * 4`（下限 10），最大 `cpu * 8`（下限 20）。
 
-use super::config;
+use daoyi_axum_config::config;
 use sea_orm::{ConnectOptions, ConnectionTrait, Database, DatabaseConnection, DbErr, Statement};
 use std::cmp::max;
 use std::time::Duration;

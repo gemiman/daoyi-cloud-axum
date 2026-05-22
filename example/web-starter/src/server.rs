@@ -5,12 +5,12 @@
 //! 获取客户端真实 IP 地址。
 
 use crate::app::AppState;
-use crate::config::ServerConfig;
 use crate::latency::LatencyOnResponse;
 use axum::Router;
 use axum::extract::{ConnectInfo, DefaultBodyLimit, Request};
 use axum::http::StatusCode;
 use bytesize::ByteSize;
+use daoyi_axum_config::config::ServerConfig;
 use std::net::SocketAddr;
 use std::time::Duration;
 use tokio::net::TcpListener;

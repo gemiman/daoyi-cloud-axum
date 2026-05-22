@@ -2,9 +2,9 @@
 //!
 //! 提供分页参数 [`PageParam`] 与分页响应 [`PageResult`] 等跨模块共享的数据类型。
 
-use crate::config;
 use crate::serde::deserialize_number;
 use crate::validation::validate_page_size;
+use daoyi_axum_config::config;
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 

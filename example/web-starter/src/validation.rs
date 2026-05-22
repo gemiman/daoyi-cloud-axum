@@ -15,7 +15,7 @@
 //! }
 //! ```
 
-use crate::config;
+use daoyi_axum_config::config;
 use regex::Regex;
 use std::borrow::Cow;
 use std::cell::LazyCell;

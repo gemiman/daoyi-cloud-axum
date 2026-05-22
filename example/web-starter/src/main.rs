@@ -6,7 +6,6 @@
 pub mod api;
 pub mod app;
 pub mod common;
-pub mod config;
 pub mod database;
 pub mod demo;
 pub mod enumeration;
