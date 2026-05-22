@@ -7,10 +7,13 @@ Rust cloud-native microservice scaffold based on Axum + SeaORM + MySQL.
 ## 特性
 
 - **Axum 0.8** — 高性能异步 Web 框架
-- **SeaORM** — 异步 ORM，支持 MySQL
+- **SeaORM 2.0** — 异步 ORM，支持 MySQL / PostgreSQL / SQLite
 - **Tokio** — 异步运行时，全特性支持
-- **Tracing** — 结构化日志，支持本地时间与时区偏移
-- **Config** — 灵活的 YAML 配置加载，支持环境变量覆盖
+- **Tracing** — 结构化日志，支持本地时间与时区偏移，自动记录请求耗时
+- **Config** — 灵活的 YAML 配置加载，支持命令行参数与环境变量覆盖
+- **Validator + axum-valid** — 声明式参数校验，支持查询参数、路径参数、JSON Body
+- **统一错误处理** — 自动映射业务错误到标准 HTTP 状态码与 JSON 响应
+- **分页支持** — 内置通用分页参数与分页响应结构
 - **Cargo Workspace** — 模块化管理，示例与主项目独立
 
 ## 快速开始
@@ -19,19 +22,54 @@ Rust cloud-native microservice scaffold based on Axum + SeaORM + MySQL.
 
 - Rust **1.94.0**+
 - Cargo
+- MySQL（可选，若使用数据库功能）
+
+### 准备数据库
+
+```sql
+CREATE DATABASE IF NOT EXISTS demo DEFAULT CHARSET utf8mb4;
+
+CREATE TABLE IF NOT EXISTS demo_sys_user
+(
+    id           BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name         VARCHAR(64) NOT NULL,
+    gender       VARCHAR(8),
+    account      VARCHAR(64),
+    password     VARCHAR(128),
+    mobile_phone VARCHAR(32),
+    birthday     DATE,
+    enabled      BOOLEAN              DEFAULT TRUE,
+    creator      VARCHAR(64),
+    create_time  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updater      VARCHAR(64),
+    update_time  DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted      BOOLEAN              DEFAULT FALSE,
+    tenant_id    BIGINT               DEFAULT 0
+) COMMENT '系统用户表';
+```
 
 ### 运行示例
 
 ```bash
-# 进入 web-starter 示例目录运行
+# 进入 web-starter 示例目录
 cd example/web-starter
+
+# 基本运行（会加载 resources/application-dev.yaml）
 APP_NAME=example-web-starter cargo run
 
-# 或指定自定义配置文件
+# 指定端口
+APP_SERVER_PORT=8080 cargo run
+
+# 指定自定义配置文件
 cargo run -- -c resources/example-web-starter-dev.yaml
 ```
 
-服务默认监听 `0.0.0.0:3000`（可在 YAML 配置中修改端口）。
+服务默认监听 `http://0.0.0.0:3000`，启动后可访问：
+
+- `GET /` — 欢迎页
+- `GET /api/users` — 条件查询用户
+- `GET /api/users/page?pageNo=1&pageSize=10` — 分页查询用户
+- `GET /api/users/page?keyword=李四&pageNo=1&pageSize=10` — 关键词搜索
 
 ## 配置说明
 
@@ -44,6 +82,26 @@ cargo run -- -c resources/example-web-starter-dev.yaml
 | `APP_NAME`    | `application` | 应用名称   |
 | `APP_PROFILE` | `dev`         | 运行环境标识 |
 
+配置文件示例（`resources/example-web-starter-dev.yaml`）：
+
+```yaml
+server:
+  port: 3001
+
+database:
+  host: 127.0.0.1
+  port: 3306
+  user: root
+  password: 123456
+  database: demo
+
+sys:
+  page_size_min: 10
+  page_size_max: 100
+  page_size_default: 20
+  page_no_default: 1
+```
+
 ### 命令行参数
 
 | 参数                     | 说明            |
@@ -55,15 +113,20 @@ cargo run -- -c resources/example-web-starter-dev.yaml
 
 ### 环境变量覆盖
 
-所有以 `APP_` 为前缀的环境变量会自动映射到配置项。例如：
+所有以 `APP_` 为前缀的环境变量会自动映射到配置项，使用下划线分隔层级。例如：
 
 ```bash
+# 覆盖 server.port
 APP_SERVER_PORT=8080 cargo run
+
+# 覆盖 database.host
+APP_DATABASE_HOST=192.168.1.100 cargo run
+
+# 覆盖 sys.page_size_max
+APP_SYS_PAGE_SIZE_MAX=500 cargo run
 ```
 
-这会覆盖 YAML 中 `server.port` 的值。
-
-## 项目结构
+## 项目架构
 
 ```
 daoyi-cloud-axum/
@@ -78,12 +141,77 @@ daoyi-cloud-axum/
 │       ├── README.md
 │       └── src/
 │           ├── main.rs                 # 服务入口
+│           ├── app.rs                  # 应用启动与状态管理
+│           ├── api/
+│           │   ├── mod.rs              # API 路由组装
+│           │   └── user.rs             # 用户 API 处理器
+│           ├── common.rs               # 通用数据结构（分页参数、分页结果）
+│           ├── config/
+│           │   ├── mod.rs              # 配置加载逻辑
+│           │   ├── server.rs           # 服务器配置
+│           │   ├── database.rs         # 数据库配置
+│           │   └── sys.rs              # 系统通用配置
+│           ├── database.rs             # 数据库连接池初始化
+│           ├── demo/
+│           │   └── entity/             # SeaORM Entity 模型（自动生成）
+│           ├── error.rs                # 统一错误处理
+│           ├── json.rs                 # 自定义 JSON 提取器
+│           ├── latency.rs              # 请求延迟记录
 │           ├── logger.rs               # 日志初始化
-│           └── config/
-│               ├── mod.rs              # 配置加载逻辑
-│               └── server.rs           # 服务器配置结构体
+│           ├── path.rs                 # 自定义路径参数提取器
+│           ├── query.rs                # 自定义查询参数提取器
+│           ├── response.rs             # 统一 API 响应格式
+│           ├── sea_orm_utils.rs        # SeaORM 工具函数
+│           ├── serde.rs                # 自定义 Serde 反序列化
+│           ├── server.rs               # HTTP 服务器构建
+│           ├── valid.rs                # 校验型参数提取器
+│           └── validation.rs           # 自定义校验函数
 └── resources/
     └── example-web-starter-dev.yaml    # 示例开发环境配置
+```
+
+### 架构设计
+
+```
+请求 → TraceLayer (日志/追踪) → NormalizePath (路径规范化)
+     → CORS → Timeout → BodyLimit
+     → Router → 路由匹配 → 404/405 Fallback
+     → Handler → 参数提取 (ValidQuery/ValidPath/ValidJson)
+               → 参数校验 (validator)
+               → 业务处理
+               → SeaORM (数据库查询)
+               → ApiResponse (JSON 响应)
+```
+
+## API 响应格式
+
+所有 API 接口返回统一的 JSON 格式：
+
+```json
+{
+  "code": 0,
+  "msg": "",
+  "data": {
+    ...
+  }
+}
+```
+
+- `code = 0`：成功
+- `code = 1`：业务错误
+- `code != 0 || 1`：由 HTTP 状态码决定（400 / 404 / 405 / 500）
+
+## 生成 SeaORM Entity
+
+```bash
+cargo install sea-orm-cli@^2.0.0-rc
+
+sea-orm-cli generate entity \
+  -u mysql://root:123456@127.0.0.1:3306/demo \
+  --with-serde both \
+  --model-extra-attributes 'serde(rename_all = "camelCase")' \
+  --date-time-crate chrono \
+  -o ./example/web-starter/src/demo/entity
 ```
 
 ## License
