@@ -2,9 +2,8 @@ use crate::app::AppState;
 use crate::common::{PageParam, PageResult};
 use crate::demo::entity::demo_sys_user;
 use crate::demo::entity::prelude::*;
-use crate::query::Query;
 use crate::response::{CommonResult, success};
-use crate::valid::Valid;
+use crate::valid::ValidQuery;
 use axum::extract::State;
 use axum::{Router, debug_handler, routing};
 use sea_orm::prelude::*;
@@ -30,10 +29,10 @@ pub struct UserQueryParams {
 #[debug_handler]
 async fn find_page(
     State(AppState { db }): State<AppState>,
-    Valid(Query(UserQueryParams {
+    ValidQuery(UserQueryParams {
         keyword,
         pagination,
-    })): Valid<Query<UserQueryParams>>,
+    }): ValidQuery<UserQueryParams>,
 ) -> CommonResult<PageResult<demo_sys_user::Model>> {
     let paginator = DemoSysUser::find()
         .apply_if(keyword.as_ref(), |query, var| {
