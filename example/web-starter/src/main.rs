@@ -19,6 +19,7 @@ pub mod response;
 pub mod sea_orm_utils;
 pub mod serde;
 pub mod server;
+pub mod valid;
 
 /// 主入口函数。
 ///
