@@ -14,7 +14,9 @@ use crate::common::{PageParam, PageResult};
 use crate::demo::entity::demo_sys_user;
 use crate::demo::entity::demo_sys_user::ActiveModel;
 use crate::demo::entity::prelude::*;
+use crate::error::ApiError;
 use crate::passwd::hash_passwd;
+use crate::path::Path;
 use crate::response::{CommonResult, success};
 use crate::valid::{ValidJson, ValidQuery};
 use crate::validation::validate_mobile_phone;
@@ -31,6 +33,8 @@ pub fn create_router() -> Router<AppState> {
         .route("/", routing::get(query_users))
         .route("/page", routing::get(find_page))
         .route("/", routing::post(create))
+        .route("/{id}", routing::put(update))
+        .route("/{id}", routing::delete(delete))
 }
 
 /// 用户分页查询参数。
@@ -155,4 +159,35 @@ async fn create(
     active_model.password = ActiveValue::Set(password);
     let result = active_model.insert(&db).await?;
     success(result.id)
+}
+
+#[debug_handler]
+async fn update(
+    State(AppState { db }): State<AppState>,
+    Path(id): Path<i64>,
+    ValidJson(params): ValidJson<UserParams>,
+) -> CommonResult<bool> {
+    let existed_user = DemoSysUser::find_by_id(id)
+        .one(&db)
+        .await?
+        .ok_or_else(|| ApiError::Biz(String::from("用户不存在")))?;
+    let password = if params.password.is_empty() {
+        existed_user.password
+    } else {
+        hash_passwd(&params.password)?
+    };
+    let mut active_model = params.into_active_model();
+    active_model.id = ActiveValue::Unchanged(id);
+    active_model.password = ActiveValue::Set(password);
+    let _result = active_model.update(&db).await?;
+    success(true)
+}
+
+#[debug_handler]
+async fn delete(
+    State(AppState { db }): State<AppState>,
+    Path(id): Path<i64>,
+) -> CommonResult<bool> {
+    let _result = DemoSysUser::delete_by_id(id).exec(&db).await?;
+    success(true)
 }
