@@ -1,6 +1,7 @@
 //! 用户 API 模块。
 //!
-//! 提供用户相关的查询接口，包括分页查询和条件过滤。
+//! 提供用户资源的完整 CRUD 接口，包括分页查询、条件过滤、
+//! 创建、更新、删除等操作。所有接口返回统一的 [`CommonResult`] 响应。
 //!
 //! ## 端点
 //!
@@ -8,6 +9,9 @@
 //! |------|------|------|
 //! | GET | `/api/users` | 条件查询用户列表（演示用） |
 //! | GET | `/api/users/page` | 分页查询用户（支持 keyword 搜索） |
+//! | POST | `/api/users` | 创建用户 |
+//! | PUT | `/api/users/{id}` | 更新用户 |
+//! | DELETE | `/api/users/{id}` | 删除用户 |
 
 use crate::app::AppState;
 use crate::common::{PageParam, PageResult};
@@ -29,6 +33,17 @@ use serde::Deserialize;
 use validator::Validate;
 
 /// 创建用户相关路由。
+/// 创建用户相关路由。
+///
+/// 注册以下端点：
+///
+/// | 方法 | 路径 | 处理器 | 说明 |
+/// |------|------|--------|------|
+/// | GET | `/api/users` | [`query_users`] | 条件查询用户列表（演示用） |
+/// | GET | `/api/users/page` | [`find_page`] | 分页查询用户 |
+/// | POST | `/api/users` | [`create`] | 创建用户 |
+/// | PUT | `/api/users/{id}` | [`update`] | 更新用户 |
+/// | DELETE | `/api/users/{id}` | [`delete`] | 删除用户 |
 pub fn create_router() -> Router<AppState> {
     Router::new()
         .route("/", routing::get(query_users))
@@ -150,6 +165,12 @@ pub struct UserParams {
     pub enabled: bool,
 }
 
+/// 创建用户处理器。
+///
+/// `POST /api/users`
+///
+/// 接收 [`UserParams`] JSON 请求体，对密码进行 bcrypt 哈希后插入数据库。
+/// 返回新创建用户的 ID。
 #[debug_handler]
 async fn create(
     State(AppState { db }): State<AppState>,
@@ -162,6 +183,12 @@ async fn create(
     success(result.id)
 }
 
+/// 更新用户处理器。
+///
+/// `PUT /api/users/{id}`
+///
+/// 先查询用户是否存在（不存在返回业务错误），若传入的密码为空则保留原密码，
+/// 否则对新密码进行 bcrypt 哈希后更新。返回 `true` 表示更新成功。
 #[debug_handler]
 async fn update(
     State(AppState { db }): State<AppState>,
@@ -184,6 +211,11 @@ async fn update(
     success(true)
 }
 
+/// 删除用户处理器。
+///
+/// `DELETE /api/users/{id}`
+///
+/// 按主键硬删除用户记录，返回受影响的行数。
 #[debug_handler]
 async fn delete(State(AppState { db }): State<AppState>, Path(id): Path<i64>) -> CommonResult<u64> {
     let result = DemoSysUser::delete_by_id(id).exec(&db).await?;

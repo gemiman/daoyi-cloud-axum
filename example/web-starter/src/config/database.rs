@@ -1,6 +1,6 @@
 //! 数据库配置子模块。
 //!
-//! 提供 MySQL/PostgreSQL 连接所需的所有配置项，所有字段均为可选，
+//! 提供 MySQL、PostgreSQL、SQLite 连接所需的所有配置项，所有字段均为可选，
 //! 未配置时使用内置默认值。
 
 use serde::Deserialize;
@@ -8,7 +8,7 @@ use serde::Deserialize;
 /// 数据库连接配置。
 ///
 /// 对应 YAML 配置文件中 `database` 节点，可通过 `APP_DATABASE_HOST`、
-/// `APP_DATABASE_PORT` 等环境变量进行覆盖。
+/// `APP_DATABASE_PORT` 等环境变量进行覆盖。所有字段均为可选，未配置时使用默认值。
 ///
 /// ## 示例 YAML
 ///
@@ -21,6 +21,18 @@ use serde::Deserialize;
 ///   password: 123456
 ///   database: demo
 /// ```
+///
+/// ## 配置项
+///
+/// | 字段 | 类型 | 默认值 | 说明 |
+/// |------|------|--------|------|
+/// | `protocol` | `str` | `"mysql"` | 数据库协议 |
+/// | `host` | `str` | `"127.0.0.1"` | 主机地址 |
+/// | `port` | `u16` | `3306` | 数据库端口 |
+/// | `user` | `str` | `"root"` | 用户名 |
+/// | `password` | `str` | `"123456"` | 密码 |
+/// | `database` | `str` | `"demo"` | 数据库名称 |
+/// | `schema` | `str` | `""` | Schema / 搜索路径 |
 #[derive(Debug, Deserialize)]
 pub struct DatabaseConfig {
     /// 数据库协议，默认 `"mysql"`。

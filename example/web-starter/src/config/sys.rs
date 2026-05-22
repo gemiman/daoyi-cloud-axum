@@ -8,7 +8,7 @@ use serde::Deserialize;
 /// 系统通用配置。
 ///
 /// 对应 YAML 配置文件中 `sys` 节点，可通过 `APP_SYS_PAGE_SIZE_MIN` 等
-/// 环境变量进行覆盖。
+/// 环境变量进行覆盖。所有字段均为可选，未配置时使用默认值。
 ///
 /// ## 示例 YAML
 ///
@@ -19,6 +19,15 @@ use serde::Deserialize;
 ///   page_size_default: 20
 ///   page_no_default: 1
 /// ```
+///
+/// ## 配置项
+///
+/// | 字段 | 类型 | 默认值 | 说明 |
+/// |------|------|--------|------|
+/// | `page_size_min` | `u64` | `1` | 分页每页条数最小值 |
+/// | `page_size_max` | `u64` | `200` | 分页每页条数最大值 |
+/// | `page_size_default` | `u64` | `10` | 分页每页条数默认值 |
+/// | `page_no_default` | `u64` | `1` | 分页页码默认值 |
 #[derive(Debug, Deserialize, Default)]
 pub struct SysConfig {
     /// 分页每页条数最小值，默认 `1`。

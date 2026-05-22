@@ -59,8 +59,13 @@ pub struct Model {
     pub tenant_id: i64,
 }
 
-/// 表关联关系定义（当前为空，后续可补充外键关联）。
+/// 表关联关系定义。
+///
+/// 当前未定义外键关联，后续可在此添加与其它表的关联关系。
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {}
 
+/// ActiveModel 行为实现。
+///
+/// 使用 SeaORM 默认行为，如需自定义钩子（如 `before_save`），在此实现。
 impl ActiveModelBehavior for ActiveModel {}

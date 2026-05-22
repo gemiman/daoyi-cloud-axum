@@ -6,31 +6,43 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// 联系人表 Model。
+///
+/// 记录联系人的基本信息、头像等。
+/// 带有标准审计字段和租户隔离字段。
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "demo_contact")]
 #[serde(rename_all = "camelCase")]
 pub struct Model {
+    /// 主键 ID。
     #[sea_orm(primary_key)]
     pub id: i64,
-    /// 姓名。
+    /// 联系人姓名。
     pub name: String,
-    /// 性别。
+    /// 性别：0-未知, 1-男, 2-女。
     pub sex: i8,
     /// 生日。
     pub birthday: DateTime,
-    /// 描述。
+    /// 个人描述。
     pub description: String,
     /// 头像 URL。
     pub avatar: Option<String>,
+    /// 创建人。
     pub creator: Option<String>,
+    /// 创建时间。
     pub create_time: DateTime,
+    /// 更新人。
     pub updater: Option<String>,
+    /// 更新时间。
     pub update_time: DateTime,
+    /// 逻辑删除标记。
     pub deleted: bool,
+    /// 租户 ID（多租户隔离）。
     pub tenant_id: i64,
 }
 
+/// 表关联关系定义（当前为空）。
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {}
 
+/// ActiveModel 行为实现。
 impl ActiveModelBehavior for ActiveModel {}

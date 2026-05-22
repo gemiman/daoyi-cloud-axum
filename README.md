@@ -13,6 +13,8 @@ Rust cloud-native microservice scaffold based on Axum + SeaORM + MySQL.
 - **Config** — 灵活的 YAML 配置加载，支持命令行参数与环境变量覆盖
 - **Validator + axum-valid** — 声明式参数校验，支持查询参数、路径参数、JSON Body
 - **统一错误处理** — 自动映射业务错误到标准 HTTP 状态码与 JSON 响应
+- **分布式 ID** — 基于雪花算法的全局唯一 ID 生成器
+- **密码安全** — bcrypt 密码哈希与验证
 - **分页支持** — 内置通用分页参数与分页响应结构
 - **Cargo Workspace** — 模块化管理，示例与主项目独立
 
@@ -70,6 +72,9 @@ cargo run -- -c resources/example-web-starter-dev.yaml
 - `GET /api/users` — 条件查询用户
 - `GET /api/users/page?pageNo=1&pageSize=10` — 分页查询用户
 - `GET /api/users/page?keyword=李四&pageNo=1&pageSize=10` — 关键词搜索
+- `POST /api/users` — 创建用户
+- `PUT /api/users/{id}` — 更新用户
+- `DELETE /api/users/{id}` — 删除用户
 
 ## 配置说明
 
@@ -144,7 +149,7 @@ daoyi-cloud-axum/
 │           ├── app.rs                  # 应用启动与状态管理
 │           ├── api/
 │           │   ├── mod.rs              # API 路由组装
-│           │   └── user.rs             # 用户 API 处理器
+│           │   └── user.rs             # 用户 API 处理器（完整 CRUD）
 │           ├── common.rs               # 通用数据结构（分页参数、分页结果）
 │           ├── config/
 │           │   ├── mod.rs              # 配置加载逻辑
@@ -154,10 +159,13 @@ daoyi-cloud-axum/
 │           ├── database.rs             # 数据库连接池初始化
 │           ├── demo/
 │           │   └── entity/             # SeaORM Entity 模型（自动生成）
+│           ├── enumeration.rs          # 枚举类型定义
 │           ├── error.rs                # 统一错误处理
+│           ├── id.rs                   # 分布式 ID 生成器（雪花算法）
 │           ├── json.rs                 # 自定义 JSON 提取器
 │           ├── latency.rs              # 请求延迟记录
 │           ├── logger.rs               # 日志初始化
+│           ├── passwd.rs               # 密码哈希与验证
 │           ├── path.rs                 # 自定义路径参数提取器
 │           ├── query.rs                # 自定义查询参数提取器
 │           ├── response.rs             # 统一 API 响应格式

@@ -107,14 +107,17 @@ impl AppConfig {
             .with_context(|| anyhow::anyhow!("Failed to deserialize config"))
     }
 
+    /// 获取服务器配置的不可变引用。
     pub fn server(&self) -> &ServerConfig {
         &self.server
     }
 
+    /// 获取数据库配置的不可变引用。
     pub fn database(&self) -> &DatabaseConfig {
         &self.database
     }
 
+    /// 获取系统通用配置的不可变引用。
     pub fn sys(&self) -> &SysConfig {
         &self.sys
     }

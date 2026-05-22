@@ -2,7 +2,8 @@
 
 daoyi-cloud-axum 的 Axum Web 服务启动示例。
 
-完整演示 Axum + SeaORM + Tracing 微服务技术栈的最佳实践，包含路由管理、参数校验、数据库操作、统一错误处理、结构化日志等功能。
+完整演示 Axum + SeaORM + Tracing 微服务技术栈的最佳实践，包含路由管理、参数校验、数据库 CRUD、统一错误处理、分布式 ID
+生成、密码安全、结构化日志等功能。
 
 ## 功能
 
@@ -11,6 +12,8 @@ daoyi-cloud-axum 的 Axum Web 服务启动示例。
 - **数据库 ORM**：基于 `sea-orm` 2.0 异步 ORM，连接池大小自适应 CPU 核心数
 - **参数校验**：集成 `validator` + `axum-valid`，支持查询参数、路径参数、JSON Body 自动校验
 - **统一错误处理**：错误自动映射为 HTTP 状态码与 JSON 响应
+- **分布式 ID**：基于 `idgenerator` 的雪花算法全局唯一 ID 生成
+- **密码安全**：基于 `bcrypt` 的密码哈希与验证
 - **分页支持**：内置通用分页参数与分页响应结构体
 - **结构化日志**：基于 `tracing`，记录请求 ID、客户端 IP、响应耗时，支持本地时间 + 时区偏移
 - **SeaORM Entity**：包含 6 张 demo 表的自动生成 Entity 模型
@@ -33,11 +36,14 @@ cargo run -p web-starter -- -c resources/example-web-starter-dev.yaml
 
 ## API 端点
 
-| 方法  | 路径                                              | 说明                    |
-|-----|-------------------------------------------------|-----------------------|
-| GET | `/`                                             | 欢迎页                   |
-| GET | `/api/users`                                    | 条件查询用户列表（固定条件演示）      |
-| GET | `/api/users/page?keyword=&pageNo=1&pageSize=10` | 分页查询（支持 keyword 模糊搜索） |
+| 方法     | 路径                                              | 说明                    |
+|--------|-------------------------------------------------|-----------------------|
+| GET    | `/`                                             | 欢迎页                   |
+| GET    | `/api/users`                                    | 条件查询用户列表（固定条件演示）      |
+| GET    | `/api/users/page?keyword=&pageNo=1&pageSize=10` | 分页查询（支持 keyword 模糊搜索） |
+| POST   | `/api/users`                                    | 创建用户                  |
+| PUT    | `/api/users/{id}`                               | 更新用户                  |
+| DELETE | `/api/users/{id}`                               | 删除用户                  |
 
 ### 响应示例
 
@@ -88,7 +94,7 @@ sys:
 | `main`             | 服务入口，模块声明与路由传递                                 |
 | `app`              | 应用启动流程与全局 State 定义                             |
 | `api`              | API 路由组装（根路径 + 子路由 + fallback）                 |
-| `api::user`        | 用户 API 处理器（分页查询 + 条件查询）                        |
+| `api::user`        | 用户 API 处理器（完整 CRUD：查询 + 分页 + 创建 + 更新 + 删除）     |
 | `common`           | 通用数据结构（`PageParam`、`PageResult`）               |
 | `config`           | YAML 配置加载（支持环境变量与命令行覆盖）                        |
 | `config::server`   | 服务器端口配置                                        |
@@ -96,10 +102,13 @@ sys:
 | `config::sys`      | 系统通用配置（分页限制等）                                  |
 | `database`         | 数据库连接池初始化（自适应 CPU 核心数）                         |
 | `demo::entity`     | SeaORM Entity 模型（6 张 demo 表，自动生成）              |
+| `enumeration`      | 枚举类型定义（`Gender` 等）                             |
 | `error`            | 统一错误枚举与 HTTP 状态码映射                             |
+| `id`               | 分布式 ID 生成器（雪花算法）                               |
 | `json`             | 自定义 JSON 提取器（错误自动映射）                           |
 | `latency`          | TraceLayer 响应耗时记录回调                            |
 | `logger`           | tracing 日志订阅器初始化                               |
+| `passwd`           | 密码哈希与验证（bcrypt）                                |
 | `path`             | 自定义路径参数提取器（错误自动映射）                             |
 | `query`            | 自定义查询参数提取器（错误自动映射）                             |
 | `response`         | 统一 API 响应格式（`ApiResponse`）                     |

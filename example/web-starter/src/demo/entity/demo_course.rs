@@ -7,28 +7,38 @@ use serde::{Deserialize, Serialize};
 
 /// 课程表 Model。
 ///
-/// 通过 `student_id` 关联学生。
+/// 通过 `student_id` 关联学生，记录课程名称和分数。
+/// 带有标准审计字段和租户隔离字段。
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "demo_course")]
 #[serde(rename_all = "camelCase")]
 pub struct Model {
+    /// 主键 ID。
     #[sea_orm(primary_key)]
     pub id: i64,
-    /// 学生 ID（外键）。
+    /// 学生 ID（关联 `demo_student` 表）。
     pub student_id: i64,
     /// 课程名称。
     pub name: String,
     /// 分数。
     pub score: i8,
+    /// 创建人。
     pub creator: Option<String>,
+    /// 创建时间。
     pub create_time: DateTime,
+    /// 更新人。
     pub updater: Option<String>,
+    /// 更新时间。
     pub update_time: DateTime,
+    /// 逻辑删除标记。
     pub deleted: bool,
+    /// 租户 ID（多租户隔离）。
     pub tenant_id: i64,
 }
 
+/// 表关联关系定义（当前为空，后续可补充与 `demo_student` 的外键关联）。
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {}
 
+/// ActiveModel 行为实现。
 impl ActiveModelBehavior for ActiveModel {}

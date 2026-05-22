@@ -1,4 +1,6 @@
 //! 服务器配置子模块。
+//!
+//! 提供 HTTP 服务器监听端口等运行时配置。
 
 use serde::Deserialize;
 
@@ -13,6 +15,12 @@ use serde::Deserialize;
 /// server:
 ///   port: 3001
 /// ```
+///
+/// ## 配置项
+///
+/// | 字段 | 类型 | 默认值 | 说明 |
+/// |------|------|--------|------|
+/// | `port` | `u16` | `3000` | HTTP 监听端口 |
 #[derive(Debug, Deserialize, Default)]
 pub struct ServerConfig {
     /// 监听端口，未配置时默认使用 `3000`。

@@ -8,25 +8,35 @@ use serde::{Deserialize, Serialize};
 /// 分类表 Model。
 ///
 /// 支持层级分类结构（通过 `parent_id` 自引用）。
+/// 带有标准审计字段和租户隔离字段。
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "demo_category")]
 #[serde(rename_all = "camelCase")]
 pub struct Model {
+    /// 主键 ID。
     #[sea_orm(primary_key)]
     pub id: i64,
     /// 分类名称。
     pub name: String,
-    /// 父分类 ID，0 表示顶级分类。
+    /// 父分类 ID，`0` 表示顶级分类。
     pub parent_id: i64,
+    /// 创建人。
     pub creator: Option<String>,
+    /// 创建时间。
     pub create_time: DateTime,
+    /// 更新人。
     pub updater: Option<String>,
+    /// 更新时间。
     pub update_time: DateTime,
+    /// 逻辑删除标记。
     pub deleted: bool,
+    /// 租户 ID（多租户隔离）。
     pub tenant_id: i64,
 }
 
+/// 表关联关系定义（当前为空）。
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {}
 
+/// ActiveModel 行为实现。
 impl ActiveModelBehavior for ActiveModel {}

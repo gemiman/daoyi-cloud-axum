@@ -138,7 +138,12 @@ impl ApiError {
 impl IntoResponse for ApiError {
     /// 将 `ApiError` 转换为 HTTP 响应。
     ///
-    /// 响应体为 JSON 格式的 [`ApiResponse`]，包含错误码和消息。
+    /// 根据错误变体设置对应的 HTTP 状态码，响应体为 JSON 格式的 [`ApiResponse`]：
+    /// - `Biz` → HTTP 200，`code = 1`
+    /// - `NotFound` → HTTP 404
+    /// - `MethodNotAllowed` → HTTP 405
+    /// - `Query` / `Path` / `Json` / `Validation` → HTTP 400
+    /// - `Internal` / `SeaOrmDb` → HTTP 500
     fn into_response(self) -> Response {
         let status_code = self.status_code();
         let json = axum::Json(ApiResponse::<()>::error(self.to_string()));

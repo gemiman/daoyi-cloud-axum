@@ -6,10 +6,14 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 /// 学生表 Model。
+///
+/// 记录学生的基本信息，包括姓名、性别、生日、个人描述等。
+/// 带有标准审计字段和租户隔离字段。
 #[derive(Clone, Debug, PartialEq, Eq, DeriveEntityModel, Serialize, Deserialize)]
 #[sea_orm(table_name = "demo_student")]
 #[serde(rename_all = "camelCase")]
 pub struct Model {
+    /// 主键 ID。
     #[sea_orm(primary_key)]
     pub id: i64,
     /// 学生姓名。
@@ -20,15 +24,23 @@ pub struct Model {
     pub birthday: DateTime,
     /// 个人描述。
     pub description: String,
+    /// 创建人。
     pub creator: Option<String>,
+    /// 创建时间。
     pub create_time: DateTime,
+    /// 更新人。
     pub updater: Option<String>,
+    /// 更新时间。
     pub update_time: DateTime,
+    /// 逻辑删除标记。
     pub deleted: bool,
+    /// 租户 ID（多租户隔离）。
     pub tenant_id: i64,
 }
 
+/// 表关联关系定义（当前为空，后续可补充与 `demo_course`、`demo_grade` 的关联）。
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {}
 
+/// ActiveModel 行为实现。
 impl ActiveModelBehavior for ActiveModel {}

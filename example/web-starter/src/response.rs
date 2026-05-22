@@ -64,9 +64,10 @@ impl<T> ApiResponse<T> {
 }
 
 impl<T: Serialize> IntoResponse for ApiResponse<T> {
-    /// 将 `ApiResponse` 转换为 HTTP 响应。
+    /// `IntoResponse` 实现。
     ///
-    /// 响应体为 JSON 格式，Content-Type 自动设为 `application/json`。
+    /// 成功响应返回 HTTP 200，响应体为 JSON 格式。
+    /// Content-Type 自动设为 `application/json`。
     fn into_response(self) -> Response {
         axum::Json(self).into_response()
     }
