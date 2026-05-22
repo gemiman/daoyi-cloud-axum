@@ -1,4 +1,5 @@
 use crate::response::ApiResponse;
+use axum::extract::rejection::{JsonRejection, PathRejection, QueryRejection};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 
@@ -16,6 +17,12 @@ pub enum ApiError {
     Internal(#[from] anyhow::Error),
     #[error("数据库错误:{0}")]
     SeaOrmDb(#[from] sea_orm::DbErr),
+    #[error("查询参数错误:{0}")]
+    Query(#[from] QueryRejection),
+    #[error("路径参数错误:{0}")]
+    Path(#[from] PathRejection),
+    #[error("Body参数错误:{0}")]
+    Json(#[from] JsonRejection),
 }
 
 impl ApiError {
@@ -23,6 +30,7 @@ impl ApiError {
         match self {
             ApiError::NotFound => StatusCode::NOT_FOUND,
             ApiError::MethodNotAllowed => StatusCode::METHOD_NOT_ALLOWED,
+            ApiError::Query(_) | ApiError::Path(_) | ApiError::Json(_) => StatusCode::BAD_REQUEST,
             ApiError::Internal(_) | ApiError::SeaOrmDb(_) => StatusCode::INTERNAL_SERVER_ERROR,
             ApiError::Biz(_) => StatusCode::OK,
         }
