@@ -15,12 +15,12 @@ use crate::demo::entity::demo_sys_user;
 use crate::demo::entity::demo_sys_user::ActiveModel;
 use crate::demo::entity::prelude::*;
 use crate::response::{CommonResult, success};
-use crate::valid::ValidQuery;
+use crate::valid::{ValidJson, ValidQuery};
 use crate::validation::validate_mobile_phone;
 use axum::extract::State;
 use axum::{Router, debug_handler, routing};
 use sea_orm::prelude::*;
-use sea_orm::{Condition, QueryTrait};
+use sea_orm::{Condition, IntoActiveModel, QueryTrait};
 use serde::Deserialize;
 use validator::Validate;
 
@@ -141,4 +141,14 @@ pub struct UserParams {
     /// 是否启用，默认 `false`。
     #[serde(default)]
     pub enabled: bool,
+}
+
+#[debug_handler]
+async fn create(
+    State(AppState { db }): State<AppState>,
+    ValidJson(params): ValidJson<UserParams>,
+) -> CommonResult<i64> {
+    let active_model = params.into_active_model();
+    let result = active_model.insert(&db).await?;
+    success(result.id)
 }

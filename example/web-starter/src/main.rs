@@ -10,6 +10,7 @@ pub mod config;
 pub mod database;
 pub mod demo;
 pub mod error;
+pub mod id;
 pub mod json;
 pub mod latency;
 pub mod logger;

@@ -3,7 +3,7 @@
 //! 定义了全局共享的 [`AppState`] 以及服务启动入口 [`run`]。
 //! `run` 按顺序完成日志初始化、数据库连接、配置加载、HTTP 服务启动等步骤。
 
-use crate::{config, database, logger, server};
+use crate::{config, database, id, logger, server};
 use axum::Router;
 use sea_orm::DatabaseConnection;
 
@@ -34,6 +34,8 @@ impl AppState {
 pub async fn run(router: Router<AppState>) -> anyhow::Result<()> {
     logger::init();
     tracing::info!("正在启动服务...");
+
+    id::init()?;
 
     // 初始化数据库连接池
     let db = database::init().await?;
