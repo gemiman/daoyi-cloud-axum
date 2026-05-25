@@ -2,21 +2,40 @@
 
 daoyi-cloud-axum 的 Axum Web 服务启动示例。
 
-完整演示 Axum + SeaORM + Tracing 微服务技术栈的最佳实践，包含路由管理、参数校验、数据库 CRUD、统一错误处理、分布式 ID
-生成、密码安全、结构化日志等功能。
+完整演示 Axum + SeaORM + Tracing 微服务技术栈的最佳实践。本项目本身极其精简——
+所有底层能力均由 Cargo Workspace 中的 lib crate 提供，示例项目仅负责**路由定义**与**业务逻辑**。
+
+## 项目结构
+
+```
+example/web-starter/
+├── Cargo.toml          # 依赖声明（所有版本由 workspace 统一管理）
+└── src/
+    ├── main.rs         # 入口：app::run(api::create_router())
+    └── api/
+        ├── mod.rs      # 路由组装 + JWT 认证中间件 + 404/405 fallback
+        └── user.rs     # 用户 CRUD 处理器（分页查询、创建、更新、删除）
+```
 
 ## 功能
 
-- **HTTP 服务器**：基于 `axum` 0.8，支持中间件链（CORS、超时、Body 限制、路径规范化）
-- **配置管理**：通过 `config` crate 读取 YAML 配置文件，支持命令行参数与环境变量覆盖
-- **数据库 ORM**：基于 `sea-orm` 2.0 异步 ORM，连接池大小自适应 CPU 核心数
-- **参数校验**：集成 `validator` + `axum-valid`，支持查询参数、路径参数、JSON Body 自动校验
-- **统一错误处理**：错误自动映射为 HTTP 状态码与 JSON 响应
-- **分布式 ID**：基于 `idgenerator` 的雪花算法全局唯一 ID 生成
-- **密码安全**：基于 `bcrypt` 的密码哈希与验证
-- **分页支持**：内置通用分页参数与分页响应结构体
-- **结构化日志**：基于 `tracing`，记录请求 ID、客户端 IP、响应耗时，支持本地时间 + 时区偏移
-- **SeaORM Entity**：包含 6 张 demo 表的自动生成 Entity 模型
+以下功能均由底层 lib crate 提供，`web-starter` 通过调用库 API 直接使用：
+
+| 功能                                              | 提供方                                       |
+|-------------------------------------------------|-------------------------------------------|
+| HTTP 服务器（中间件链：超时、Body 限制、日志、CORS、路径规范化）         | `daoyi-axum-app::app::server`             |
+| YAML 配置加载（环境变量覆盖、命令行参数）                         | `daoyi-axum-config::config`               |
+| 数据库 ORM（sea-orm 连接池，自适应 CPU 核心数）                | `daoyi-axum-app::app::database`           |
+| 参数校验（validator + axum-valid，支持 Query/Path/JSON） | `daoyi-axum-support::support::valid`      |
+| 统一错误处理（自动映射 HTTP 状态码 + JSON 响应）                 | `daoyi-axum-support::support::error`      |
+| 统一响应格式（code/msg/data）                           | `daoyi-axum-support::support::response`   |
+| 分布式 ID 生成（雪花算法）                                 | `daoyi-axum-support::support::id`         |
+| 密码哈希与验证（bcrypt）                                 | `daoyi-axum-support::support::passwd`     |
+| JWT 认证（HMAC-SHA256 编解码 + Bearer Token 中间件）      | `daoyi-axum-app::app::auth::jwt`          |
+| 分页支持（通用分页参数 + 分页响应）                             | `daoyi-axum-app::app::common`             |
+| 自定义校验函数（手机号正则等）                                 | `daoyi-axum-app::app::validation`         |
+| 结构化日志（tracing，请求 ID、IP、耗时、本地时间）                 | `daoyi-axum-support::support::logger`     |
+| SeaORM Entity（6 张 demo 表）                       | `daoyi-sea-orm-entity-demo::demo::entity` |
 
 ## 运行
 
@@ -89,56 +108,49 @@ sys:
 
 ## 模块
 
-| 模块                 | 说明                                             |
-|--------------------|------------------------------------------------|
-| `main`             | 服务入口，模块声明与路由传递                                 |
-| `app`              | 应用启动流程与全局 State 定义                             |
-| `api`              | API 路由组装（根路径 + 子路由 + fallback）                 |
-| `api::user`        | 用户 API 处理器（完整 CRUD：查询 + 分页 + 创建 + 更新 + 删除）     |
-| `common`           | 通用数据结构（`PageParam`、`PageResult`）               |
-| `config`           | YAML 配置加载（支持环境变量与命令行覆盖）                        |
-| `config::server`   | 服务器端口配置                                        |
-| `config::database` | 数据库连接配置                                        |
-| `config::sys`      | 系统通用配置（分页限制等）                                  |
-| `database`         | 数据库连接池初始化（自适应 CPU 核心数）                         |
-| `demo::entity`     | SeaORM Entity 模型（6 张 demo 表，自动生成）              |
-| `enumeration`      | 枚举类型定义（`Gender` 等）                             |
-| `error`            | 统一错误枚举与 HTTP 状态码映射                             |
-| `id`               | 分布式 ID 生成器（雪花算法）                               |
-| `json`             | 自定义 JSON 提取器（错误自动映射）                           |
-| `latency`          | TraceLayer 响应耗时记录回调                            |
-| `logger`           | tracing 日志订阅器初始化                               |
-| `passwd`           | 密码哈希与验证（bcrypt）                                |
-| `path`             | 自定义路径参数提取器（错误自动映射）                             |
-| `query`            | 自定义查询参数提取器（错误自动映射）                             |
-| `response`         | 统一 API 响应格式（`ApiResponse`）                     |
-| `sea_orm_utils`    | SeaORM 扩展工具函数（占位）                              |
-| `serde`            | 自定义反序列化函数（字符串/数字兼容）                            |
-| `server`           | HTTP 服务器构建（中间件链组装）                             |
-| `valid`            | 校验型参数提取器（`ValidQuery`/`ValidPath`/`ValidJson`） |
-| `validation`       | 自定义校验函数（分页范围、手机号正则）                            |
+| 模块          | 文件                | 说明                                  |
+|-------------|-------------------|-------------------------------------|
+| `main`      | `src/main.rs`     | 服务入口，调用 `app::run()` 一键启动           |
+| `api`       | `src/api/mod.rs`  | 路由组装、JWT 认证中间件注入、404/405 fallback   |
+| `api::user` | `src/api/user.rs` | 用户完整 CRUD（条件查询 + 分页 + 创建 + 更新 + 删除） |
+
+> 其他 20+ 个模块已迁移至 Cargo Workspace 的 lib crate 中，详见：
+> - [`daoyi-axum-config`](../../crates/libs/daoyi-axum-config/) — 配置管理
+> - [`daoyi-axum-support`](../../crates/libs/daoyi-axum-support/) — 基础设施
+> - [`daoyi-axum-app`](../../crates/libs/daoyi-axum-app/) — 应用启动与核心功能
+> - [`daoyi-sea-orm-entity-demo`](../../crates/sea-orm-entities/daoyi-sea-orm-entity-demo/) — 数据库 Entity
 
 ## 开发指南
 
+### 中间件链顺序
+
+中间件按 layer 顺序从外到内执行（由 `daoyi-axum-app` 的 `server.rs` 组装）：
+
+```
+请求 → TimeoutLayer (120s) → DefaultBodyLimit (2 GiB)
+     → TraceLayer (日志/追踪/耗时) → CorsLayer (跨域)
+     → NormalizePathLayer (路径规范化)
+     → Router → JWT Auth Middleware → 路由匹配 → Handler
+```
+
 ### 生成 SeaORM Entity
 
-```shell
-cargo install sea-orm-cli@^2.0.0-rc
-
+```bash
 sea-orm-cli generate entity \
   -u mysql://root:123456@127.0.0.1:3306/demo \
   --with-serde both \
   --model-extra-attributes 'serde(rename_all = "camelCase")' \
   --date-time-crate chrono \
-  -o ./example/web-starter/src/demo/entity
+  -o ./crates/sea-orm-entities/daoyi-sea-orm-entity-demo/src/demo/entity
 ```
 
-### 中间件链顺序
-
-中间件按定义的 layer 顺序从外到内执行：
+### 依赖关系
 
 ```
-请求 → TimeoutLayer (120s) → DefaultBodyLimit (2GiB)
-     → TraceLayer (日志/追踪/耗时) → CorsLayer (跨域)
-     → NormalizePathLayer (去尾部斜杠) → Router → Handler
+web-starter
+├── daoyi-axum-app            # 应用启动、JWT、分页、校验
+│   ├── daoyi-axum-support    # 错误处理、ID 生成、密码等工具
+│   └── daoyi-axum-config     # 配置管理
+└── daoyi-sea-orm-entity-demo # 数据库实体模型
+    └── daoyi-axum-support
 ```
