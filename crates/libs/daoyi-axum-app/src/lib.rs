@@ -1,16 +1,16 @@
+//! `daoyi-axum-app` — 应用启动与核心功能 crate。
+//!
+//! 负责组装中间件链、数据库连接、JWT 认证等核心功能，
+//! 并通过 [`app::run`] 提供一键启动 HTTP 服务的入口函数。
+//!
+//! ## 核心模块
+//!
+//! | 模块 | 功能 |
+//! |------|------|
+//! | [`app::server`] | HTTP 服务器构建与启动 |
+//! | [`app::database`] | 数据库连接池初始化 |
+//! | [`app::common`] | 通用数据结构（分页等） |
+//! | [`app::auth`] | JWT 认证（编解码 + 中间件） |
+//! | [`app::validation`] | 自定义参数校验函数 |
+
 pub mod app;
-
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
-}

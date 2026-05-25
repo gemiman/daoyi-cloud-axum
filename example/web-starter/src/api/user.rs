@@ -33,7 +33,6 @@ use serde::Deserialize;
 use validator::Validate;
 
 /// 创建用户相关路由。
-/// 创建用户相关路由。
 ///
 /// 注册以下端点：
 ///

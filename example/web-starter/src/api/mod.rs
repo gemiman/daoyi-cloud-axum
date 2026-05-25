@@ -16,7 +16,7 @@
 
 use axum::{Router, debug_handler, routing};
 use daoyi_axum_app::app::AppState;
-use daoyi_axum_app::app::auth::jwt::middleware::gey_auth_layer;
+use daoyi_axum_app::app::auth::jwt::middleware::get_auth_layer;
 use daoyi_axum_support::support::error::{ApiError, ApiResult};
 use daoyi_axum_support::support::response::{CommonResult, success};
 
@@ -32,7 +32,7 @@ pub mod user;
 pub fn create_router() -> Router<AppState> {
     Router::new()
         .nest("/api", Router::new().nest("/users", user::create_router()))
-        .route_layer(gey_auth_layer())
+        .route_layer(get_auth_layer())
         // .route_layer(axum::middleware::from_fn(xxx))
         // .route_layer(axum::middleware::from_fn_with_state(xxx))
         .route("/", routing::get(index))
