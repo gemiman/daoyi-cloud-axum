@@ -66,6 +66,14 @@ pub enum ApiError {
     /// 参数校验失败（400），包含字段级错误详情。
     #[error("参数校验失败:{0}")]
     Validation(String),
+
+    /// JWT 解析失败（401），包含错误详情。
+    #[error("Token解析失败:{0}")]
+    JWT(#[from] jsonwebtoken::errors::Error),
+
+    /// 未授权（401），包含错误详情。
+    #[error("未授权:{0}")]
+    Unauthenticated(String),
 }
 
 impl From<ValidRejection<ApiError>> for ApiError {
@@ -130,6 +138,7 @@ impl ApiError {
             | ApiError::Json(_)
             | ApiError::Validation(_) => StatusCode::BAD_REQUEST,
             ApiError::Internal(_) | ApiError::SeaOrmDb(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            ApiError::JWT(_) | ApiError::Unauthenticated(_) => StatusCode::UNAUTHORIZED,
             ApiError::Biz(_) => StatusCode::OK,
         }
     }
@@ -148,5 +157,11 @@ impl IntoResponse for ApiError {
         let status_code = self.status_code();
         let json = axum::Json(ApiResponse::<()>::error(self.to_string()));
         (status_code, json).into_response()
+    }
+}
+
+impl From<ApiError> for Response {
+    fn from(value: ApiError) -> Self {
+        value.into_response()
     }
 }

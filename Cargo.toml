@@ -79,7 +79,7 @@ daoyi-sea-orm-entity-demo = { version = "0.1.0", path = "crates/sea-orm-entities
 # --- Web / Async ---
 axum = { version = "0.8.9", features = ["macros"] }
 tokio = { version = "1.52.3", features = ["full"] }
-tower-http = { version = "0.6.11", features = ["trace", "timeout", "limit", "cors", "normalize-path"] }
+tower-http = { version = "0.6.11", features = ["trace", "timeout", "limit", "cors", "normalize-path", "auth"] }
 
 # --- Observability ---
 tracing = { version = "0.1.44", features = ["async-await"] }
@@ -107,3 +107,4 @@ axum-valid = { version = "0.24.0", features = ["full_validator"] }
 regex = { version = "1.12.3" }
 idgenerator = { version = "2.0.0" }
 bcrypt = { version = "0.19.1" }
+jsonwebtoken = { version = "10.4.0" }

@@ -16,6 +16,7 @@
 
 use axum::{Router, debug_handler, routing};
 use daoyi_axum_app::app::AppState;
+use daoyi_axum_app::app::auth::jwt::middleware::gey_auth_layer;
 use daoyi_axum_support::support::error::{ApiError, ApiResult};
 use daoyi_axum_support::support::response::{CommonResult, success};
 
@@ -30,8 +31,11 @@ pub mod user;
 /// - 全局 405 method_not_allowed fallback（返回 JSON 错误）
 pub fn create_router() -> Router<AppState> {
     Router::new()
-        .route("/", routing::get(index))
         .nest("/api", Router::new().nest("/users", user::create_router()))
+        .route_layer(gey_auth_layer())
+        // .route_layer(axum::middleware::from_fn(xxx))
+        // .route_layer(axum::middleware::from_fn_with_state(xxx))
+        .route("/", routing::get(index))
         // 所有未匹配的路由返回 404
         .fallback(async || -> ApiResult<()> {
             tracing::warn!("Not Found");

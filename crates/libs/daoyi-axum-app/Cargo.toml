@@ -27,3 +27,4 @@ xid.workspace = true         # 全局唯一 ID 生成（请求追踪）
 bytesize.workspace = true    # 人类可读的字节大小表示
 tokio.workspace = true
 tower-http.workspace = true
+jsonwebtoken.workspace = true
