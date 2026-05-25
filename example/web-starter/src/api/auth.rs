@@ -1,8 +1,9 @@
 use axum::extract::State;
 use axum::{Extension, Router, debug_handler, routing};
 use daoyi_axum_app::app::AppState;
+use daoyi_axum_app::app::auth::Principal;
+use daoyi_axum_app::app::auth::jwt::default_jwt;
 use daoyi_axum_app::app::auth::jwt::middleware::get_auth_layer;
-use daoyi_axum_app::app::auth::jwt::{Principal, default_jwt};
 use daoyi_axum_support::support::error::ApiError;
 use daoyi_axum_support::support::passwd::verify_passwd_async;
 use daoyi_axum_support::support::response::{CommonResult, success};
@@ -56,6 +57,7 @@ async fn login(
                 return Err(ApiError::Biz(String::from("账号或密码错误")));
             }
             let principal = Principal {
+                tenant_id: user.tenant_id,
                 id: user.id,
                 name: user.name,
             };

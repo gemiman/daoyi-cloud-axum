@@ -26,6 +26,7 @@
 
 pub mod middleware;
 
+use crate::app::auth::Principal;
 use jsonwebtoken::{
     Algorithm, DecodingKey, EncodingKey, Header, Validation, get_current_timestamp,
 };
@@ -40,18 +41,6 @@ const DEFAULT_SECRET: &str = "12345678";
 
 /// 全局默认 JWT 实例。
 static DEFAULT_JWT_INSTANCE: LazyLock<JWT> = LazyLock::new(|| JWT::default());
-
-/// 认证主体，解码 JWT 后得到的用户信息。
-///
-/// 通过 [`JWTAuth`](middleware::JWTAuth) 中间件自动注入到
-/// 请求的 [`Extensions`](axum::http::Extensions) 中。
-#[derive(Debug, Clone, Serialize)]
-pub struct Principal {
-    /// 用户 ID。
-    pub id: i64,
-    /// 用户名称。
-    pub name: String,
-}
 
 /// JWT 声明集（Claims）。
 ///
@@ -169,7 +158,10 @@ impl JWT {
         let current_timestamp = get_current_timestamp();
         let claims = Claims {
             jti: xid::new().to_string(),
-            sub: format!("{}:{}", principal.id, principal.name),
+            sub: format!(
+                "{}:{}:{}",
+                principal.tenant_id, principal.id, principal.name
+            ),
             aud: self.audience.clone(),
             iss: self.issuer.clone(),
             iat: current_timestamp,
@@ -193,10 +185,15 @@ impl JWT {
     pub fn decode(&self, token: &str) -> anyhow::Result<Principal> {
         let claims: Claims =
             jsonwebtoken::decode(token, &self.decode_secret, &self.validation)?.claims;
-        let mut parts = claims.sub.splitn(2, ':');
+        let mut parts = claims.sub.splitn(3, ':');
+        let tenant_id = parts.next().unwrap().parse::<i64>()?;
         let id = parts.next().unwrap().parse::<i64>()?;
         let name = parts.next().unwrap().to_string();
-        Ok(Principal { id, name })
+        Ok(Principal {
+            tenant_id,
+            id,
+            name,
+        })
     }
 }
 

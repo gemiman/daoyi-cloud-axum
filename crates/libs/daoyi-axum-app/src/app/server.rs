@@ -5,7 +5,7 @@
 //! 获取客户端真实 IP 地址。
 
 use crate::app::AppState;
-use crate::app::auth::jwt::Principal;
+use crate::app::auth::Principal;
 use axum::Router;
 use axum::extract::{ConnectInfo, DefaultBodyLimit, Request};
 use axum::http::StatusCode;
