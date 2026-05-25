@@ -20,7 +20,7 @@ use daoyi_axum_app::app::common::{PageParam, PageResult};
 use daoyi_axum_app::app::validation::validate_mobile_phone;
 use daoyi_axum_support::support::enumeration::Gender;
 use daoyi_axum_support::support::error::ApiError;
-use daoyi_axum_support::support::passwd::hash_passwd;
+use daoyi_axum_support::support::passwd::hash_passwd_async;
 use daoyi_axum_support::support::path::Path;
 use daoyi_axum_support::support::response::{CommonResult, success};
 use daoyi_axum_support::support::valid::{ValidJson, ValidQuery};
@@ -175,7 +175,7 @@ async fn create(
     State(AppState { db }): State<AppState>,
     ValidJson(params): ValidJson<UserParams>,
 ) -> CommonResult<i64> {
-    let password = hash_passwd(&params.password)?;
+    let password = hash_passwd_async(params.password.clone()).await?;
     let mut active_model = params.into_active_model();
     active_model.password = ActiveValue::Set(password);
     let result = active_model.insert(&db).await?;
@@ -201,7 +201,7 @@ async fn update(
     let password = if params.password.is_empty() {
         existed_user.password
     } else {
-        hash_passwd(&params.password)?
+        hash_passwd_async(params.password.clone()).await?
     };
     let mut active_model = params.into_active_model();
     active_model.id = ActiveValue::Unchanged(id);

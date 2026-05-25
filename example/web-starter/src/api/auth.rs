@@ -4,7 +4,7 @@ use daoyi_axum_app::app::AppState;
 use daoyi_axum_app::app::auth::jwt::middleware::get_auth_layer;
 use daoyi_axum_app::app::auth::jwt::{Principal, default_jwt};
 use daoyi_axum_support::support::error::ApiError;
-use daoyi_axum_support::support::passwd::{hash_passwd, verify_passwd};
+use daoyi_axum_support::support::passwd::verify_passwd_async;
 use daoyi_axum_support::support::response::{CommonResult, success};
 use daoyi_axum_support::support::valid::ValidJson;
 use daoyi_sea_orm_entity_demo::demo::entity::demo_sys_user;
@@ -38,32 +38,42 @@ pub struct LoginResult {
 }
 
 #[debug_handler]
-#[tracing::instrument(name = "login", skip_all, fields(account = %account, password = %password))]
+#[tracing::instrument(name = "login", skip_all, fields(account = %account))]
 async fn login(
     State(AppState { db }): State<AppState>,
     // ConnectInfo(addr): ConnectInfo<SocketAddr>,
     ValidJson(LoginParams { account, password }): ValidJson<LoginParams>,
 ) -> CommonResult<LoginResult> {
     tracing::info!("开始处理登录请求...");
-    let hashed_password = hash_passwd("1")?;
     let user = DemoSysUser::find()
         .filter(demo_sys_user::Column::Account.eq(&account))
         .one(&db)
-        .await?
-        .ok_or_else(|| {
-            let _x = verify_passwd(&password, &hashed_password);
-            ApiError::Biz(String::from("账号或密码错误"))
-        })?;
-    if !verify_passwd(&password, &user.password)? {
-        return Err(ApiError::Biz(String::from("账号或密码错误")));
+        .await?;
+
+    match user {
+        Some(user) => {
+            if !verify_passwd_async(password, user.password).await? {
+                return Err(ApiError::Biz(String::from("账号或密码错误")));
+            }
+            let principal = Principal {
+                id: user.id,
+                name: user.name,
+            };
+            let access_token = default_jwt().encode(principal)?;
+            tracing::info!("登录成功，生成 Token：{access_token}");
+            success(LoginResult { access_token })
+        }
+        None => {
+            // 用户不存在时也执行一次 bcrypt 验证（用假密码），
+            // 使响应时间与"用户存在但密码错误"的情况相近，防止时序攻击枚举有效账号。
+            verify_passwd_async(
+                "dummy_input".to_string(),
+                "$2b$12$LJ3m4ys3GmzgMBx7cE2KZOm6QhYhW0rPqM5L0zR0RjLmVR0aFdrXK".to_string(),
+            )
+            .await?;
+            Err(ApiError::Biz(String::from("账号或密码错误")))
+        }
     }
-    let principal = Principal {
-        id: user.id,
-        name: user.name,
-    };
-    let access_token = default_jwt().encode(principal)?;
-    tracing::info!("登录成功，生成 Token：{access_token}");
-    success(LoginResult { access_token })
 }
 
 #[debug_handler]

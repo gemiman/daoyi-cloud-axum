@@ -5,6 +5,7 @@
 //! 获取客户端真实 IP 地址。
 
 use crate::app::AppState;
+use crate::app::auth::jwt::Principal;
 use axum::Router;
 use axum::extract::{ConnectInfo, DefaultBodyLimit, Request};
 use axum::http::StatusCode;
@@ -84,10 +85,16 @@ impl Server {
                     .get::<ConnectInfo<SocketAddr>>()
                     .map(|connect_info| connect_info.0.ip())
                     .unwrap_or_else(|| std::net::IpAddr::V4(std::net::Ipv4Addr::UNSPECIFIED));
+                let user_id = if let Some(principal) = request.extensions().get::<Principal>() {
+                    principal.id
+                } else {
+                    -1
+                };
                 tracing::info_span!(
                     "HTTP Request",
                     id = %id,
                     ip = %ip,
+                    user_id = %user_id,
                     method = %method,
                     path = %path
                 )
