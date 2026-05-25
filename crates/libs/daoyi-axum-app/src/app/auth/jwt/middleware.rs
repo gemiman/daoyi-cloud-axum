@@ -31,6 +31,7 @@ use axum::http::{Request, header};
 use axum::response::Response;
 use daoyi_axum_support::support::error::ApiError;
 use std::pin::Pin;
+use std::sync::LazyLock;
 use tower_http::auth::{AsyncAuthorizeRequest, AsyncRequireAuthorizationLayer};
 
 /// JWT 认证中间件。
@@ -45,6 +46,10 @@ use tower_http::auth::{AsyncAuthorizeRequest, AsyncRequireAuthorizationLayer};
 /// 3. 若缺少 Bearer 前缀 → 返回 401
 /// 4. Token 解码失败 → 返回 500（Internal，因为 Token 格式问题通常由服务端引起）
 /// 5. 解码成功 → 将 [`Principal`] 注入 `request.extensions_mut()`
+
+static AUTH_LAYER: LazyLock<AsyncRequireAuthorizationLayer<JWTAuth>> =
+    LazyLock::new(|| AsyncRequireAuthorizationLayer::new(JWTAuth::new(default_jwt())));
+
 #[derive(Debug, Clone)]
 pub struct JWTAuth {
     /// JWT 编解码器的静态引用。
@@ -117,6 +122,6 @@ impl AsyncAuthorizeRequest<Body> for JWTAuth {
 ///     .nest("/api", protected_routes)
 ///     .route_layer(get_auth_layer())
 /// ```
-pub fn get_auth_layer() -> AsyncRequireAuthorizationLayer<JWTAuth> {
-    AsyncRequireAuthorizationLayer::new(JWTAuth::new(default_jwt()))
+pub fn get_auth_layer() -> &'static AsyncRequireAuthorizationLayer<JWTAuth> {
+    &AUTH_LAYER
 }

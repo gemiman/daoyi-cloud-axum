@@ -20,6 +20,7 @@ use daoyi_axum_app::app::auth::jwt::middleware::get_auth_layer;
 use daoyi_axum_support::support::error::{ApiError, ApiResult};
 use daoyi_axum_support::support::response::{CommonResult, success};
 
+pub mod auth;
 pub mod user;
 
 /// 创建并组装所有 API 路由。
@@ -31,11 +32,16 @@ pub mod user;
 /// - 全局 405 method_not_allowed fallback（返回 JSON 错误）
 pub fn create_router() -> Router<AppState> {
     Router::new()
-        .nest("/api", Router::new().nest("/users", user::create_router()))
-        .route_layer(get_auth_layer())
-        // .route_layer(axum::middleware::from_fn(xxx))
-        // .route_layer(axum::middleware::from_fn_with_state(xxx))
         .route("/", routing::get(index))
+        .nest(
+            "/api",
+            Router::new()
+                .nest("/users", user::create_router())
+                .route_layer(get_auth_layer())
+                // .route_layer(axum::middleware::from_fn(xxx))
+                // .route_layer(axum::middleware::from_fn_with_state(xxx)))
+                .nest("/auth", auth::create_router()),
+        )
         // 所有未匹配的路由返回 404
         .fallback(async || -> ApiResult<()> {
             tracing::warn!("Not Found");

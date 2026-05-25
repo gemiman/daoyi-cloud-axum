@@ -45,7 +45,7 @@ static DEFAULT_JWT_INSTANCE: LazyLock<JWT> = LazyLock::new(|| JWT::default());
 ///
 /// 通过 [`JWTAuth`](middleware::JWTAuth) 中间件自动注入到
 /// 请求的 [`Extensions`](axum::http::Extensions) 中。
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct Principal {
     /// 用户 ID。
     pub id: i64,
