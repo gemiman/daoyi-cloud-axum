@@ -15,7 +15,8 @@ export function setToken(token: string) {
 }
 
 const instance = axios.create({
-    baseURL: "http://localhost:3001/api",
+    baseURL: "/api",
+    // baseURL: "http://127.0.0.1:8080/api",
     headers: {
         "Content-Type": "application/json",
     },
