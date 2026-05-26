@@ -44,16 +44,24 @@ example/web-starter/
 ## 运行
 
 ```bash
-# 在项目根目录运行
+# bash / zsh
 cargo run -p web-starter
-
-# 指定应用名称与配置文件前缀
 APP_NAME=example-web-starter cargo run -p web-starter
-
-# 指定端口（通过环境变量覆盖）
 APP_SERVER_PORT=8080 cargo run -p web-starter
+```
 
-# 指定配置文件
+```fish
+# fish — 使用 env 前缀设置环境变量（推荐）
+env APP_NAME=example-web-starter cargo run -p web-starter
+env APP_SERVER_PORT=8080 cargo run -p web-starter
+
+# 或者用 set -x 导出
+set -x APP_NAME example-web-starter
+cargo run -p web-starter
+```
+
+```bash
+# 指定配置文件（所有 shell 通用）
 cargo run -p web-starter -- -c resources/example-web-starter-dev.yaml
 ```
 
@@ -154,6 +162,33 @@ sys:
 > - [`daoyi-axum-support`](../../crates/libs/daoyi-axum-support/) — 基础设施
 > - [`daoyi-axum-app`](../../crates/libs/daoyi-axum-app/) — 应用启动与核心功能
 > - [`daoyi-sea-orm-entity-demo`](../../crates/sea-orm-entities/daoyi-sea-orm-entity-demo/) — 数据库 Entity
+
+## 发布构建
+
+```bash
+# Release 优化构建（启用 LTO + strip + panic=abort）
+cargo build --release -p web-starter
+
+# 产物
+ls -lh target/release/web-starter
+```
+
+部署运行：
+
+```bash
+# bash / zsh
+APP_NAME=example-web-starter APP_PROFILE=prod ./target/release/web-starter
+```
+
+```fish
+# fish — 使用 env 前缀
+env APP_NAME=example-web-starter APP_PROFILE=prod ./target/release/web-starter
+```
+
+```bash
+# 后台运行（所有 shell 通用）
+nohup ./target/release/web-starter -c resources/example-web-starter-prod.yaml > /var/log/web-starter.log 2>&1 &
+```
 
 ## 开发指南
 

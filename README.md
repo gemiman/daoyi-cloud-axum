@@ -54,14 +54,25 @@ CREATE TABLE IF NOT EXISTS demo_sys_user
 ### 运行示例
 
 ```bash
-# 基本运行（会加载 resources/example-web-starter-dev.yaml）
+# bash / zsh
 cd example/web-starter
 APP_NAME=example-web-starter cargo run
-
-# 指定端口
 APP_SERVER_PORT=8080 cargo run
+```
 
-# 指定自定义配置文件路径
+```fish
+# fish — 使用 env 前缀设置环境变量
+cd example/web-starter
+env APP_NAME=example-web-starter cargo run
+env APP_SERVER_PORT=8080 cargo run
+
+# 或者用 set -x 导出
+set -x APP_NAME example-web-starter
+cargo run
+```
+
+```bash
+# 指定自定义配置文件路径（所有 shell 通用）
 cargo run -- -c resources/example-web-starter-dev.yaml
 ```
 
@@ -249,6 +260,56 @@ web-starter (示例项目)
 | `0`  | 成功      | 200                         |
 | `1`  | 业务错误    | 200                         |
 | 其他   | 由错误类型决定 | 400 / 401 / 404 / 405 / 500 |
+
+## 发布构建
+
+生产环境请使用 `--release` 构建，编译器会启用全量优化：
+
+```bash
+# 在项目根目录构建 web-starter 示例（Release 优化）
+cargo build --release -p web-starter
+
+# 构建产物路径
+ls -lh target/release/web-starter
+```
+
+### Release Profile 说明
+
+`Cargo.toml` 已配置以下生产优化参数：
+
+| 参数              | 值         | 说明                               |
+|-----------------|-----------|----------------------------------|
+| `opt-level`     | `3`       | 最高优化级别                           |
+| `lto`           | `true`    | 全链接时优化，跨 crate 内联                |
+| `codegen-units` | `1`       | 单代码生成单元，最大化内联                    |
+| `strip`         | `true`    | 移除符号表，减小二进制体积                    |
+| `panic`         | `"abort"` | abort 替代 unwind，减小体积并加速 panic 路径 |
+
+### 部署运行
+
+Release 构建产物可直接部署运行，配合环境变量配置：
+
+```bash
+# bash / zsh
+APP_NAME=example-web-starter APP_PROFILE=prod ./target/release/web-starter
+APP_SERVER_PORT=3000 ./target/release/web-starter
+./target/release/web-starter -c resources/example-web-starter-prod.yaml
+```
+
+```fish
+# fish — 使用 env 前缀
+env APP_NAME=example-web-starter APP_PROFILE=prod ./target/release/web-starter
+env APP_SERVER_PORT=3000 ./target/release/web-starter
+./target/release/web-starter -c resources/example-web-starter-prod.yaml
+```
+
+```bash
+# 后台运行（所有 shell 通用）
+nohup ./target/release/web-starter -c resources/example-web-starter-prod.yaml > /var/log/web-starter.log 2>&1 &
+```
+
+> 建议在生产环境创建 `resources/example-web-starter-prod.yaml` 配置文件，配置正式数据库地址、JWT 密钥等敏感信息，并通过环境变量
+`APP_PROFILE=prod` 自动加载。
 
 ## 生成 SeaORM Entity
 
