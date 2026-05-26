@@ -6,7 +6,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
     appType: "spa",
-    // base: "/static",
+    base: "/static",
     plugins: [
         TanStackRouterVite({
             routesDirectory: resolve(import.meta.dirname, "src/pages"),

@@ -6,6 +6,7 @@
 use daoyi_axum_app::app;
 
 pub mod api;
+pub mod web;
 
 /// 主入口函数。
 ///

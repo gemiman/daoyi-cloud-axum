@@ -14,11 +14,13 @@
 //! 子模块：
 //! - [`user`] — 用户相关 API
 
+use crate::web;
 use axum::{Router, debug_handler, routing};
 use daoyi_axum_app::app::AppState;
 use daoyi_axum_app::app::auth::jwt::middleware::get_auth_layer;
 use daoyi_axum_support::support::error::{ApiError, ApiResult};
 use daoyi_axum_support::support::response::{CommonResult, success};
+use tower_http::compression::CompressionLayer;
 
 pub mod auth;
 pub mod user;
@@ -32,7 +34,6 @@ pub mod user;
 /// - 全局 405 method_not_allowed fallback（返回 JSON 错误）
 pub fn create_router() -> Router<AppState> {
     Router::new()
-        .route("/", routing::get(index))
         .nest(
             "/api",
             Router::new()
@@ -40,18 +41,26 @@ pub fn create_router() -> Router<AppState> {
                 .route_layer(get_auth_layer())
                 // .route_layer(axum::middleware::from_fn(xxx))
                 // .route_layer(axum::middleware::from_fn_with_state(xxx)))
-                .nest("/auth", auth::create_router()),
+                .route("/", routing::get(index))
+                .nest("/auth", auth::create_router())
+                // 所有未匹配的路由返回 404
+                .fallback(async || -> ApiResult<()> {
+                    tracing::warn!("Not Found");
+                    Err(ApiError::NotFound)
+                }),
         )
-        // 所有未匹配的路由返回 404
-        .fallback(async || -> ApiResult<()> {
-            tracing::warn!("Not Found");
-            Err(ApiError::NotFound)
-        })
+        .nest(
+            "/static",
+            Router::new()
+                .route("/{*file}", routing::get(web::static_handler))
+                .route_layer(CompressionLayer::new()),
+        )
         // 路由匹配但方法错误时返回 405
         .method_not_allowed_fallback(async || -> ApiResult<()> {
             tracing::warn!("Method Not Allowed");
             Err(ApiError::MethodNotAllowed)
         })
+        .fallback(web::index_handler)
 }
 
 /// 根路径 `/` 的 GET 处理器。
