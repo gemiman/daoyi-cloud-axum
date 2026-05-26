@@ -11,13 +11,13 @@ Rust cloud-native microservice scaffold based on Axum + SeaORM + MySQL.
 - **Tokio** — 异步运行时，全特性支持
 - **Tracing** — 结构化日志，支持本地时间与时区偏移，自动记录请求耗时
 - **Config** — 灵活的 YAML 配置加载，支持命令行参数与环境变量覆盖
-- **Validator + axum-valid** — 声明式参数校验，支持查询参数、路径参数、JSON Body
+- **Validator + axum-valid** — 声明式参数校验，支持 Query / Path / JSON Body
 - **统一错误处理** — 自动映射业务错误到标准 HTTP 状态码与 JSON 响应
 - **分布式 ID** — 基于雪花算法的全局唯一 ID 生成器
-- **密码安全** — bcrypt 密码哈希与验证
-- **JWT 认证** — HMAC-SHA256 Token 编解码 + Bearer Token 中间件
+- **密码安全** — bcrypt 密码哈希与验证，支持同步/异步两种模式
+- **JWT 认证** — HMAC-SHA256 Token 编解码 + Bearer Token 认证中间件
 - **分页支持** — 内置通用分页参数与分页响应结构
-- **Cargo Workspace** — 模块化管理，示例与主项目独立
+- **Cargo Workspace** — 模块化管理，核心能力拆分为独立 lib crate
 
 ## 快速开始
 
@@ -54,28 +54,29 @@ CREATE TABLE IF NOT EXISTS demo_sys_user
 ### 运行示例
 
 ```bash
-# 进入 web-starter 示例目录
+# 基本运行（会加载 resources/example-web-starter-dev.yaml）
 cd example/web-starter
-
-# 基本运行（会加载 resources/application-dev.yaml）
 APP_NAME=example-web-starter cargo run
 
 # 指定端口
 APP_SERVER_PORT=8080 cargo run
 
-# 指定自定义配置文件
+# 指定自定义配置文件路径
 cargo run -- -c resources/example-web-starter-dev.yaml
 ```
 
 服务默认监听 `http://0.0.0.0:3000`，启动后可访问：
 
 - `GET /` — 欢迎页
-- `GET /api/users` — 条件查询用户
-- `GET /api/users/page?pageNo=1&pageSize=10` — 分页查询用户
-- `GET /api/users/page?keyword=李四&pageNo=1&pageSize=10` — 关键词搜索
+- `GET /api/users` — 条件查询用户（固定条件演示）
+- `GET /api/users/page?pageNo=1&pageSize=20` — 分页查询用户
+- `GET /api/users/page?keyword=李四&pageNo=1&pageSize=10` — 关键词模糊搜索
 - `POST /api/users` — 创建用户
 - `PUT /api/users/{id}` — 更新用户
 - `DELETE /api/users/{id}` — 删除用户
+- `POST /api/auth/login` — 用户登录（返回 JWT Token）
+- `GET /api/auth/user-info` — 获取当前登录用户信息（需 Bearer Token）
+- `GET /static/{*file}` — 静态资源（前端 SPA）
 
 ## 配置说明
 
@@ -146,12 +147,11 @@ daoyi-cloud-axum/
 ├── crates/
 │   ├── libs/
 │   │   ├── daoyi-axum-config/                    # 配置管理 crate
-│   │   │   └── src/
-│   │   │       └── config/
-│   │   │           ├── mod.rs                    # 配置加载（YAML + 环境变量 + CLI）
-│   │   │           ├── server.rs                 # 服务器配置
-│   │   │           ├── database.rs               # 数据库配置
-│   │   │           └── sys.rs                    # 系统通用配置（分页参数）
+│   │   │   └── src/config/
+│   │   │       ├── mod.rs                        # 配置加载（YAML + 环境变量 + CLI）
+│   │   │       ├── server.rs                     # 服务器端口配置
+│   │   │       ├── database.rs                   # 数据库连接配置
+│   │   │       └── sys.rs                        # 系统通用配置（分页参数）
 │   │   ├── daoyi-axum-support/                   # 基础设施支撑 crate
 │   │   │   └── src/support/
 │   │   │       ├── error.rs                      # 统一错误枚举（自动映射 HTTP 状态码）
@@ -173,6 +173,7 @@ daoyi-cloud-axum/
 │   │           ├── validation.rs                 # 自定义参数校验函数
 │   │           ├── sea_orm_utils.rs              # SeaORM 工具函数（占位）
 │   │           └── auth/
+│   │               ├── mod.rs                    # 认证主体定义
 │   │               └── jwt/
 │   │                   ├── mod.rs                # JWT 编解码器
 │   │                   └── middleware.rs          # Bearer Token 认证中间件
@@ -180,44 +181,54 @@ daoyi-cloud-axum/
 │       └── daoyi-sea-orm-entity-demo/            # SeaORM Entity 模型 crate
 │           └── src/demo/entity/
 │               ├── demo_sys_user.rs              # 系统用户表
-│               ├── demo_category.rs              # 分类表
+│               ├── demo_category.rs              # 分类表（层级结构）
 │               ├── demo_contact.rs               # 联系人表
 │               ├── demo_course.rs                # 课程表
 │               ├── demo_grade.rs                 # 成绩表
 │               └── demo_student.rs               # 学生表
 ├── example/
-│   └── web-starter/                              # Web 服务示例
+│   └── web-starter/                              # Web 服务完整示例
 │       ├── Cargo.toml
 │       └── src/
 │           ├── main.rs                           # 服务入口
-│           └── api/
-│               ├── mod.rs                        # API 路由组装
-│               └── user.rs                       # 用户 API（完整 CRUD）
+│           ├── api/
+│           │   ├── mod.rs                        # API 路由组装
+│           │   ├── user.rs                       # 用户 API（完整 CRUD）
+│           │   └── auth.rs                       # 认证 API（登录/用户信息）
+│           └── web/
+│               └── mod.rs                        # 静态资源处理（SPA）
 └── resources/
-    └── example-web-starter-dev.yaml              # 示例开发环境配置
+    └── example-web-starter-dev.yaml              # 开发环境配置示例
 ```
 
-### 架构设计
+### 请求处理管线
 
 ```
-请求 → Timeout (120s) → BodyLimit (2 GiB) → TraceLayer (日志/追踪)
-     → CORS → NormalizePath (路径规范化)
-     → Router → JWT Auth Middleware → 路由匹配 → 404/405 Fallback
-     → Handler → 参数提取 (ValidQuery/ValidPath/ValidJson)
-               → 参数校验 (validator)
-               → 业务处理
-               → SeaORM (数据库查询)
-               → ApiResponse (JSON 响应)
+请求 → TimeoutLayer (120s)
+     → DefaultBodyLimit (2 GiB)
+     → TraceLayer (xid / IP / userId / 耗时)
+     → CorsLayer (跨域)
+     → NormalizePathLayer (路径规范化)
+     → Router
+         → JWT Auth Middleware (Bearer Token 认证)
+         → 路由匹配 → Handler
+             → 参数提取 (ValidQuery / ValidPath / ValidJson)
+             → 参数校验 (validator)
+             → 业务处理
+             → SeaORM (数据库查询)
+             → ApiResponse (JSON 响应)
+         → 404 Fallback (路由未匹配)
+         → 405 Fallback (方法不被允许)
 ```
 
 ### Crate 依赖关系
 
 ```
-web-starter (示例)
+web-starter (示例项目)
 ├── daoyi-axum-app（应用启动、中间件、JWT 认证）
-│   ├── daoyi-axum-support（错误处理、ID 生成、密码等）
+│   ├── daoyi-axum-support（错误处理、ID 生成、密码、日志等工具）
 │   └── daoyi-axum-config（配置管理）
-└── daoyi-sea-orm-entity-demo（数据库实体）
+└── daoyi-sea-orm-entity-demo（数据库实体模型）
     └── daoyi-axum-support
 ```
 
@@ -229,15 +240,15 @@ web-starter (示例)
 {
   "code": 0,
   "msg": "",
-  "data": {
-    ...
-  }
+  "data": { ... }
 }
 ```
 
-- `code = 0`：成功
-- `code = 1`：业务错误
-- `code != 0 || 1`：由 HTTP 状态码决定（400 / 404 / 405 / 500）
+| code | 含义      | HTTP 状态码                    |
+|------|---------|-----------------------------|
+| `0`  | 成功      | 200                         |
+| `1`  | 业务错误    | 200                         |
+| 其他   | 由错误类型决定 | 400 / 401 / 404 / 405 / 500 |
 
 ## 生成 SeaORM Entity
 

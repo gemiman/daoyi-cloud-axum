@@ -2,7 +2,7 @@
 
 应用配置管理 crate，提供 YAML 配置文件加载、环境变量覆盖和命令行参数支持。
 
-全局配置通过 `LazyLock` 实现线程安全的单例模式，首次访问时自动初始化，后续调用直接返回缓存结果。
+全局配置通过 [`LazyLock`](https://doc.rust-lang.org/std/sync/struct.LazyLock.html) 实现线程安全的单例模式，首次访问时自动初始化，后续调用直接返回缓存结果。
 
 ## 配置加载优先级
 
@@ -14,11 +14,11 @@
 
 ## 模块
 
-| 模块                 | 说明                                        |
-|--------------------|-------------------------------------------|
-| `config::server`   | 服务器端口配置                                   |
-| `config::database` | 数据库连接配置（host/port/user/password/database） |
-| `config::sys`      | 系统通用配置（分页参数限制等）                           |
+| 模块                 | 说明                                                        |
+|--------------------|-----------------------------------------------------------|
+| `config::server`   | 服务器端口配置，默认监听 3000                                         |
+| `config::database` | 数据库连接配置（protocol/host/port/user/password/database/schema） |
+| `config::sys`      | 系统通用配置（分页参数的范围限制与默认值）                                     |
 
 ## 使用示例
 
@@ -48,11 +48,13 @@ server:
   port: 3001
 
 database:
+  protocol: mysql
   host: 127.0.0.1
   port: 3306
   user: root
   password: 123456
   database: demo
+  schema: ""
 
 sys:
   page_size_min: 10
@@ -63,6 +65,6 @@ sys:
 
 ## 依赖
 
-- `config` — 配置加载与反序列化
-- `serde` — 序列化/反序列化
+- `config` — 配置加载与反序列化（支持 YAML 格式）
+- `serde` — 序列化 / 反序列化
 - `anyhow` — 错误处理
